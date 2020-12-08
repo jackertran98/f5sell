@@ -54,20 +54,12 @@ class ItemStore extends Component {
     }
   };
   onMomentumScrollBegin = () => {
-    console.log("Hello");
     this.onEndReachedCalledDuringMomentum = false;
-    console.log(this.onEndReachedCalledDuringMomentum);
   };
   onEndReached = ({ distanceFromEnd }) => {
     const { username, authUser, name } = this.props;
     const { dayStart, dayEnd, statusOrser, loadingMore } = this.state;
-    console.log(
-      "offset tone",
-      this.offset,
-      this.onEndReachedCalledDuringMomentum
-    );
     if (!this.onEndReachedCalledDuringMomentum) {
-      console.log("offset", this.offset, this.onEndReachedCalledDuringMomentum);
       this.offset = this.offset + 1;
       this.setState(
         {
@@ -81,10 +73,9 @@ class ItemStore extends Component {
             END_TIME: dayEnd,
             PAGE: this.offset,
             NUMOFPAGE: 8,
-            IDSHOP: "BABU12",
+            IDSHOP: this.props.idshop.USER_CODE,
           })
             .then((result) => {
-              console.log("list order", result);
               if (result.data.ERROR == "0000") {
                 this.setState(
                   { data: _.concat(this.state.data, result.data.INFO) },
@@ -98,7 +89,6 @@ class ItemStore extends Component {
             })
             .catch((error) => {
               this.setState({ loadingMore: false });
-              console.log(error);
             });
 
           this.onEndReachedCalledDuringMomentum = true;
@@ -124,10 +114,9 @@ class ItemStore extends Component {
           END_TIME: dayEnd,
           PAGE: this.offset,
           NUMOFPAGE: 8,
-          IDSHOP: "BABU12",
+          IDSHOP: this.props.idshop.USER_CODE,
         })
           .then((result) => {
-            console.log("list order", result);
             if (result.data.ERROR == "0000") {
               this.setState({ data: result.data.INFO }, async () => {
                 this.setState({ loadingSlow: false });
@@ -138,7 +127,6 @@ class ItemStore extends Component {
           })
           .catch((error) => {
             this.setState({ loadingSlow: false, data: [] });
-            console.log(error);
           })
     );
   };
@@ -153,10 +141,9 @@ class ItemStore extends Component {
       END_TIME: dayEnd,
       PAGE: this.offset,
       NUMOFPAGE: 8,
-      IDSHOP: "BABU12",
+      IDSHOP: this.props.idshop.USER_CODE,
     })
       .then((result) => {
-        console.log("list order", result);
         if (result.data.ERROR == "0000") {
           this.setState({ data: result.data.INFO }, async () => {
             navigation.setParams({
@@ -170,13 +157,11 @@ class ItemStore extends Component {
       })
       .catch((error) => {
         this.setState({ loading: false });
-        console.log(error);
       });
   };
   componentDidMount() {
     const { username, authUser, navigation, name } = this.props;
     const { dayStart, dayEnd, statusOrser } = this.state;
-    console.log("name", name);
 
     getListOrderStore({
       USERNAME: authUser.USERNAME,
@@ -185,10 +170,9 @@ class ItemStore extends Component {
       END_TIME: dayEnd,
       PAGE: this.offset,
       NUMOFPAGE: 10,
-      IDSHOP: "BABU12",
+      IDSHOP: this.props.idshop.USER_CODE,
     })
       .then((result) => {
-        console.log("list order", result);
         if (result.data.ERROR == "0000") {
           this.setState({ data: result.data.INFO }, () => {
             this.setState({ loading: false });
@@ -202,15 +186,10 @@ class ItemStore extends Component {
       })
       .catch((error) => {
         this.setState({ loading: false });
-        console.log(error);
       });
   }
   changeTitle = () => {
     const { dayStart, dayEnd, statusOrser } = this.state;
-
-    //console.log("status", statusOrser === "", statusOrser === 0);
-
-    //alert(statusOrser);
     if (statusOrser === "") {
       //alert(1);
       return "- Tất cả -";
@@ -243,10 +222,7 @@ class ItemStore extends Component {
       picked,
       loadingSlow,
     } = this.state;
-    //console.log("loadingMore", this.state.data);
     const { authUser, navigation, TYPE, name } = this.props;
-    // console.log(this.props.route, "-----");
-    console.log(this.props, "-");
     return loading ? (
       <Spinner
         visible={loading}
@@ -301,7 +277,6 @@ class ItemStore extends Component {
               onConfirm={(day) => {
                 this.handleDate(day, this.type);
                 this.setState({ showCalendar: false });
-                console.log(day);
               }}
               onCancel={() => this.setState({ showCalendar: false })}
             />
@@ -362,6 +337,7 @@ const mapStateToProps = (state) => {
     status: state.authUser.status,
     authUser: state.authUser.authUser,
     username: state.authUser.username,
+    idshop: state.product.database,
   };
 };
 

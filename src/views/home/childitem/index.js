@@ -51,11 +51,10 @@ class ChildListItem extends Component {
     await getListSubChildProducts({
       USERNAME: this.props.username == "" ? null : this.props.username,
       SUB_ID: ID,
-      IDSHOP: "BABU12",
+      IDSHOP: this.props.idshop.USER_CODE,
       SEARCH_NAME: this.state.search,
     })
       .then((result) => {
-        //console.log("list sub ", result);
         if (result.data.ERROR == "0000") {
           for (let i = 0; i < result.data.DETAIL.length; i++) {
             result.data.DETAIL[i].data = result.data.DETAIL[i].INFO;
@@ -83,7 +82,6 @@ class ChildListItem extends Component {
         }
       })
       .catch((error) => {
-        console.log(error);
         this.setState({ loadingSearch: false });
       });
   };
@@ -96,7 +94,7 @@ class ChildListItem extends Component {
     await getListSubChildProducts({
       USERNAME: this.props.username,
       SUB_ID: ID,
-      IDSHOP: "BABU12",
+      IDSHOP: this.props.idshop.USER_CODE,
       SEARCH_NAME: "",
     })
       .then((result) => {
@@ -121,7 +119,6 @@ class ChildListItem extends Component {
         }
       })
       .catch((error) => {
-        console.log(error);
         this.setState({ loading: false });
       });
   }
@@ -129,7 +126,6 @@ class ChildListItem extends Component {
   render() {
     const { loading, data, refreshing, search } = this.state;
     const { navigation, status, authUser } = this.props;
-    console.log("tUAN", data);
     return loading ? (
       <Spinner
         visible={loading}
@@ -161,7 +157,7 @@ class ChildListItem extends Component {
             onFocus={() => (this.see = true)}
             onBlur={() => (this.see = false)}
             onChangeText={(text) => this.setState({ search: text })}
-            returnKeyLabel="Search"
+            
             onSubmitEditing={async () => {
               this.setState(
                 {
@@ -198,7 +194,6 @@ class ChildListItem extends Component {
             if (index == section.INFO.length - 1) {
               this.count = 0;
             }
-            console.log("count", this.count, index);
             return this.count == 0 ? (
               <View
                 style={{
@@ -267,7 +262,7 @@ class ChildListItem extends Component {
                   navigation.navigate("SubChildItem", {
                     name: SUB_NAME,
                     ID: SUB_ID,
-                    SUB_ID_PARENT: this.props.route.params.ID,
+                    SUB_ID_PAR: this.props.route.params.ID,
                     NAME: "ChildListItem",
                   });
                 }}
@@ -292,6 +287,7 @@ const mapStateToProps = (state) => {
     status: state.authUser.status,
     authUser: state.authUser.authUser,
     username: state.authUser.username,
+    idshop: state.product.database,
   };
 };
 

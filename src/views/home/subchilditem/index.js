@@ -36,17 +36,14 @@ class SubChildItem extends Component {
     this.onEndReachedCalledDuringMomentum = true;
   }
   onMomentumScrollBegin = () => {
-    console.log("Hello");
     this.onEndReachedCalledDuringMomentum = false;
-    console.log(this.onEndReachedCalledDuringMomentum);
   };
 
   onEndReached = ({ distanceFromEnd }) => {
     const { loadingMore } = this.state;
-    const { ID, SUB_ID_PARENT } = this.props.route.params;
+    const { ID, SUB_ID_PAR } = this.props.route.params;
 
     if (!this.onEndReachedCalledDuringMomentum) {
-      console.log("offset", this.offset, this.onEndReachedCalledDuringMomentum);
       this.offset = this.offset + 1;
       this.setState(
         {
@@ -55,11 +52,11 @@ class SubChildItem extends Component {
         () => {
           getListProductDetails({
             USERNAME: null,
-            SUB_ID_PARENT: SUB_ID_PARENT,
+            SUB_ID_PARENT: SUB_ID_PAR,
             SUB_ID: ID,
             PAGE: this.offset,
             NUMOFPAGE: 10,
-            IDSHOP: "BABU12",
+            IDSHOP: this.props.idshop.USER_CODE,
           })
             .then((result) => {
               if (result.data.ERROR === "0000") {
@@ -76,11 +73,9 @@ class SubChildItem extends Component {
                   }, 10);
                 });
               }
-              console.log("Du", result);
             })
             .catch((error) => {
               this.setState({ loadingMore: false });
-              console.log(error);
             });
           this.onEndReachedCalledDuringMomentum = true;
         }
@@ -92,11 +87,11 @@ class SubChildItem extends Component {
     this.offset = 1;
     getListProductDetails({
       USERNAME: null,
-      SUB_ID_PARENT: SUB_ID_PARENT,
+      SUB_ID_PARENT:"",
       SUB_ID: ID,
       PAGE: this.offset,
       NUMOFPAGE: 10,
-      IDSHOP: "BABU12",
+      IDSHOP: this.props.idshop.USER_CODE,
     })
       .then((result) => {
         if (result.data.ERROR === "0000") {
@@ -108,24 +103,21 @@ class SubChildItem extends Component {
             }, 10);
           });
         }
-        console.log("Du", result);
       })
       .catch((error) => {
         this.setState({ loading: false });
-        console.log(error);
       });
   };
 
   componentDidMount() {
     const { ID, SUB_ID_PARENT } = this.props.route.params;
-    console.log("ID", ID);
     getListProductDetails({
       USERNAME: null,
       SUB_ID_PARENT: SUB_ID_PARENT,
       SUB_ID: ID,
       PAGE: this.offset,
       NUMOFPAGE: 10,
-      IDSHOP: "BABU12",
+      IDSHOP: this.props.idshop.USER_CODE,
     })
       .then((result) => {
         if (result.data.ERROR === "0000") {
@@ -139,11 +131,9 @@ class SubChildItem extends Component {
             }, 10);
           });
         }
-        console.log("Du", result);
       })
       .catch((error) => {
         this.setState({ loading: false });
-        console.log(error);
       });
   }
   render() {
@@ -224,11 +214,16 @@ const styles = StyleSheet.create({
     width: sizeWidth(47),
     overflow: "hidden",
     marginRight: sizeWidth(2),
+    justifyContent:'center',
+    alignItems:'center',
   },
   imageSize: {
     width: sizeWidth(45),
+    justifyContent:'center',
+    alignItems:'center',
     // width: sizeWidth(30),
     height: sizeHeight(20),
+    
     //height: sizeHeight(20),
     overflow: "visible",
   },
@@ -256,6 +251,7 @@ const mapStateToProps = (state) => {
     status: state.authUser.status,
     authUser: state.authUser.authUser,
     username: state.authUser.username,
+    idshop:state.product.database,
   };
 };
 

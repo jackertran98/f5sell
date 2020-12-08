@@ -35,7 +35,6 @@ export default class ListOrdered extends PureComponent {
       TYPE,
       name,
     } = this.props;
-    console.log("onMomentumScrollBegin", TYPE, data);
     return (
       <View style={{ flex: 1 }}>
         <FlatList

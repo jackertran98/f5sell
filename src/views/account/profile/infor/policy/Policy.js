@@ -31,10 +31,9 @@ class Policy extends Component {
       USERNAME: authUser.USERNAME,
       TYPES: 2,
       CATEGORY: "",
-      IDSHOP: "BABU12",
+      IDSHOP: this.props.idshop.USER_CODE,
     })
       .then((result) => {
-        console.log(result);
         if (result.data.ERROR === "0000") {
           this.setState(
             {
@@ -48,11 +47,11 @@ class Policy extends Component {
       })
       .catch((err) => {
         this.setState({ loading: false });
-        console.log(err);
       });
   }
   render() {
     const { loading, data } = this.state;
+    console.log("data chính sách",data)
     return loading ? (
       <Spinner
         visible={loading}
@@ -74,8 +73,8 @@ class Policy extends Component {
               <TouchableOpacity
                 style={styles.touch}
                 onPress={() =>
-                  this.props.navigation.navigate("DetailPolicy", {
-                    item: item,
+                  this.props.navigation.navigate("Chi tiết chính sách", {
+                    item: item.ID,
                   })
                 }
               >
@@ -113,6 +112,7 @@ const mapStateToProps = (state) => {
     status: state.authUser.status,
     authUser: state.authUser.authUser,
     username: state.authUser.username,
+    idshop: state.product.database,
   };
 };
 

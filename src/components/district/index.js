@@ -19,13 +19,12 @@ export default class ListDistrict extends Component {
       search: "",
       nameCity: [],
     };
-    //this.nameCity = [];
   }
   async componentDidMount() {
     const { GHN_TINHID } = this.props.route.params;
     await GetDistrict({ ID_CITY: GHN_TINHID })
       .then((result) => {
-        console.log(result.data, "district");
+
         if (result.data.ERROR == "0000") {
           this.setState(
             {
@@ -41,7 +40,6 @@ export default class ListDistrict extends Component {
       })
       .catch((error) => {
         this.setState({ loading: false });
-        console.log(error);
       });
 
     // for (let i = 0; i < this.state.data.length; i++) {
@@ -65,56 +63,56 @@ export default class ListDistrict extends Component {
     return loading ? (
       <Spinner visible={loading} customIndicator={<ElementCustom />} />
     ) : (
-      <View style={styles.viewTouchCommon}>
-        <SearchComponent
-          name="search"
-          color="#999"
-          size={sizeFont(4)}
-          value={search}
-          placeholder={"Tìm kiếm"}
-          onChangeText={(text) => {
-            this.setState({ search: text }, () => {
-              this.SearchCity(search);
-            });
-          }}
-          isIcon={false}
-          onSearch={this.SearchCity}
-        />
-        <View
-          style={{ marginTop: sizeHeight(2), marginBottom: sizeHeight(15) }}
-        >
-          <FlatList
-            data={nameCity.length == 0 ? data : nameCity}
-            showsVerticalScrollIndicator={false}
-            extraData={this.state}
-            ListHeaderComponent={() => {
-              return (
-                <ItemCommon
-                  title="- None -"
-                  name="chevron-right"
-                  onPress={() => {
-                    onSetDistrict("- tất cả -");
-                    this.props.navigation.goBack();
-                  }}
-                />
-              );
+        <View style={styles.viewTouchCommon}>
+          <SearchComponent
+            name="search"
+            color="#999"
+            size={sizeFont(4)}
+            value={search}
+            placeholder={"Tìm kiếm"}
+            onChangeText={(text) => {
+              this.setState({ search: text }, () => {
+                this.SearchCity(search);
+              });
             }}
-            renderItem={({ item, index }) => {
-              return (
-                <ItemCommon
-                  title={item.NAME}
-                  name="chevron-right"
-                  onPress={() => {
-                    onSetDistrict(item);
-                    this.props.navigation.goBack();
-                  }}
-                />
-              );
-            }}
-            keyExtractor={(item) => item.MAQH}
+            isIcon={false}
+            onSearch={this.SearchCity}
           />
+          <View
+            style={{ marginTop: sizeHeight(2), marginBottom: sizeHeight(15) }}
+          >
+            <FlatList
+              data={nameCity.length == 0 ? data : nameCity}
+              showsVerticalScrollIndicator={false}
+              extraData={this.state}
+              ListHeaderComponent={() => {
+                return (
+                  <ItemCommon
+                    title="- None -"
+                    name="chevron-right"
+                    onPress={() => {
+                      onSetDistrict("- tất cả -");
+                      this.props.navigation.goBack();
+                    }}
+                  />
+                );
+              }}
+              renderItem={({ item, index }) => {
+                return (
+                  <ItemCommon
+                    title={item.NAME}
+                    name="chevron-right"
+                    onPress={() => {
+                      onSetDistrict(item);
+                      this.props.navigation.goBack();
+                    }}
+                  />
+                );
+              }}
+              keyExtractor={(item) => item.MAQH}
+            />
+          </View>
         </View>
-      </View>
-    );
+      );
   }
 }

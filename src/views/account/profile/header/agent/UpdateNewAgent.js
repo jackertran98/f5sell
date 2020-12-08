@@ -92,14 +92,10 @@ class UpdateNewAgent extends Component {
   componentDidMount() {}
   handleImage = (type) => {
     ImagePicker.showImagePicker(options, async (response) => {
-      console.log("Response = ", response);
 
       if (response.didCancel) {
-        console.log("User cancelled image picker");
       } else if (response.error) {
-        console.log("ImagePicker Error: ", response.error);
       } else if (response.customButton) {
-        console.log("User tapped custom button: ", response.customButton);
       } else {
         const source = { uri: response.uri };
 
@@ -111,8 +107,6 @@ class UpdateNewAgent extends Component {
           },
           () => this.upload(source, response.data, type)
         );
-
-        console.log("image", response);
       }
     });
   };
@@ -135,9 +129,7 @@ class UpdateNewAgent extends Component {
       })
         .then(async (res) => {
           let responseJson = await res.json();
-          console.log(responseJson);
           if (responseJson.ERROR == "0000") {
-            console.log("Upload Successful", responseJson.URL);
             if (type === 1) {
               this.setState(
                 {
@@ -177,7 +169,6 @@ class UpdateNewAgent extends Component {
           }
         })
         .catch((err) => {
-          console.log("err", err);
           this.setState({ loading: false });
         });
     }
@@ -187,7 +178,6 @@ class UpdateNewAgent extends Component {
       this.setState({ city: "", district: "", districChild: "" });
     } else {
       this.setState({ city: text, district: "", districChild: "" }, () => {
-        console.log(this.state.district, "2020202020202020");
       });
     }
   };
@@ -244,7 +234,7 @@ class UpdateNewAgent extends Component {
       TENTK: bankName,
       TENNH: nameBank,
       AVATAR: imageAvatar,
-      IDSHOP: "BABU12",
+      IDSHOP: "ABC123",
       CMT: numCMNN,
       IMG1: CMT_1,
       IMG2: CMT_2,
@@ -255,7 +245,6 @@ class UpdateNewAgent extends Component {
       STATUS: status === true ? 1 : 0,
     })
       .then((result) => {
-        console.log("update", result);
         if (result.data.ERROR === "0000") {
           this.setState(
             {
@@ -290,7 +279,6 @@ class UpdateNewAgent extends Component {
       })
       .catch((error) => {
         this.setState({ loading: false });
-        console.log(error);
       });
   };
   handleDate = (item) => {
@@ -329,7 +317,6 @@ class UpdateNewAgent extends Component {
       showAlert,
       showCalendar,
     } = this.state;
-    console.log("data", showCalendar);
     return (
       <Provider>
         <ScrollView
@@ -591,7 +578,6 @@ class UpdateNewAgent extends Component {
                     this.message = "Vui lòng chọn Quận/Huyện";
                     this.setState({ showAlert: true });
                   } else {
-                    console.log("dis", district);
                     this.props.navigation.navigate("ListDistrictChild", {
                       onSetDistrictChild: this.changeDistrictChild,
                       GHN_TINHID: district.MAQH,
@@ -740,7 +726,6 @@ class UpdateNewAgent extends Component {
             maximumDate={new Date()}
             onConfirm={(day) => {
               this.handleDate(day);
-              console.log(day);
             }}
             onCancel={() => this.setState({ showCalendar: false })}
           />

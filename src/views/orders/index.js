@@ -5,7 +5,6 @@ import Itemstore from "./itemstore";
 
 class OrderUser extends PureComponent {
   render() {
-    console.log("props", this.props.navigation);
     const { navigation, name } = this.props;
     return name === "OrderUser" ? (
       <Itemorder TYPE={1} navigation={navigation} name={name} />

@@ -24,7 +24,7 @@ export default class Loading extends Component {
           alignSelf: 'center',
         }}
       >
-        <SkypeIndicator color={COLOR.BUTTON} size={sizeFont(10)} />
+        <SkypeIndicator color={COLOR.LOADING} size={sizeFont(10)} />
       </View>
     );
   }

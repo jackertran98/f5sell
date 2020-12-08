@@ -125,7 +125,7 @@ class UpdateInformation extends Component {
       TENTK: nameAccount,
       TENNH: nameBank,
       AVATAR: imageAvatar,
-      IDSHOP: "BABU12",
+      IDSHOP: this.props.idshop.USER_CODE,
       CMT: passport,
       IMG1: CMT_1,
       IMG2: CMT_2,
@@ -135,7 +135,6 @@ class UpdateInformation extends Component {
       MOBILE: phoneText,
     })
       .then((result) => {
-        console.log("update", result);
         if (result.data.ERROR === "0000") {
           this.setState(
             {
@@ -144,15 +143,13 @@ class UpdateInformation extends Component {
             () => {
               this.props
                 .GetProfile({
-                  IDSHOP: "BABU12",
+                  IDSHOP: this.props.idshop.USER_CODE,
                   USER_CTV: this.props.authUser.USERNAME,
                   USERNAME: this.props.authUser.USERNAME,
                 })
                 .then((result) => {
-                  console.log(result, "login");
                 })
                 .catch((error) => {
-                  console.log(error);
                   this.setState({ loading: false });
                 });
               this.message = setTimeout(
@@ -171,7 +168,7 @@ class UpdateInformation extends Component {
                 () =>
                   AlertCommon("Thông báo", result.data.RESULT, () => {
                     this.props.navigation.popToTop();
-                    this.props.navigation.navigate("Home");
+                    this.props.navigation.navigate("home");
                   }),
                 10
               );
@@ -181,7 +178,6 @@ class UpdateInformation extends Component {
       })
       .catch((error) => {
         this.setState({ loading: false });
-        console.log(error);
       });
   };
   changeCity = (text) => {
@@ -211,9 +207,7 @@ class UpdateInformation extends Component {
       })
         .then(async (res) => {
           let responseJson = await res.json();
-          console.log(responseJson);
           if (responseJson.ERROR == "0000") {
-            console.log("Upload Successful", responseJson.URL);
             if (type === 1) {
               this.setState(
                 {
@@ -253,7 +247,6 @@ class UpdateInformation extends Component {
           }
         })
         .catch((err) => {
-          console.log("err", err);
           this.setState({ loading: false });
         });
     }
@@ -274,14 +267,10 @@ class UpdateInformation extends Component {
   };
   handleImage = (type) => {
     ImagePicker.showImagePicker(options, async (response) => {
-      console.log("Response = ", response);
 
       if (response.didCancel) {
-        console.log("User cancelled image picker");
       } else if (response.error) {
-        console.log("ImagePicker Error: ", response.error);
       } else if (response.customButton) {
-        console.log("User tapped custom button: ", response.customButton);
       } else {
         const source = { uri: response.uri };
 
@@ -293,8 +282,6 @@ class UpdateInformation extends Component {
           },
           () => this.upload(source, response.data, type)
         );
-
-        console.log("image", response);
       }
     });
   };
@@ -352,7 +339,6 @@ class UpdateInformation extends Component {
       CMT_2,
       showCalendar,
     } = this.state;
-    console.log(showCalendar, "20202020");
     return (
       <Provider>
         <ScrollView keyboardShouldPersistTaps="handled">
@@ -653,7 +639,6 @@ class UpdateInformation extends Component {
                     this.message = "Vui lòng chọn Quận/Huyện";
                     this.setState({ showAlert: true });
                   } else {
-                    console.log("dis", district);
                     this.props.navigation.navigate("ListDistrictChild", {
                       onSetDistrictChild: this.changeDistrictChild,
                       GHN_TINHID: district.MAQH,
@@ -793,7 +778,6 @@ class UpdateInformation extends Component {
             maximumDate={new Date()}
             onConfirm={(day) => {
               this.handleDate(day);
-              console.log(day);
             }}
             onCancel={() => this.setState({ showCalendar: false })}
           />
@@ -813,6 +797,7 @@ const mapStateToProps = (state) => {
     status: state.authUser.status,
     authUser: state.authUser.authUser,
     username: state.authUser.username,
+    idshop: state.product.database,
   };
 };
 

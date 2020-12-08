@@ -5,11 +5,9 @@ export const getListOrder = (data) => {
     return api
       .post("get_order_history", data)
       .then((result) => {
-        console.log("list order", result);
         resolve(result);
       })
       .catch((error) => {
-        console.log(error);
         reject(error);
       });
   });
@@ -19,11 +17,9 @@ export const getListOrderStore = (data) => {
     return api
       .post("get_order_history_store_babu", data)
       .then((result) => {
-        console.log("list order store", result);
         resolve(result);
       })
       .catch((error) => {
-        console.log(error);
         reject(error);
       });
   });
@@ -31,21 +27,18 @@ export const getListOrderStore = (data) => {
 export const getDetailOrdered = (data) => {
   return new Promise((resolve, reject) => {
     return api
-      .post("get_order_history_detail_babu", data)
+      .post("get_order_history_detail", data)
       .then((result) => {
-        console.log("detail order", result);
         resolve(result);
       })
       .catch((error) => {
-        console.log(error);
         reject(error);
       });
   });
 };
 
-export const orderProduct = (data) => {
+export const orderProduct  = (data) => {
   return new Promise((resolve, reject) => {
-    console.log("data", data);
     return api
       .post("order_product3", data, {
         // paramsSerializer: (params) => {
@@ -53,11 +46,9 @@ export const orderProduct = (data) => {
         // },
       })
       .then((result) => {
-        console.log(" order", result);
         resolve(result);
       })
       .catch((error) => {
-        console.log(error);
         reject(error);
       });
   });
@@ -66,13 +57,11 @@ export const orderProduct = (data) => {
 export const updateOrder = (data) => {
   return new Promise((resolve, reject) => {
     return api
-      .post("edit_order_product2", data)
+      .post("edit_order_product", data)
       .then((result) => {
-        console.log("update order", result);
         resolve(result);
       })
       .catch((error) => {
-        console.log(error);
         reject(error);
       });
   });
@@ -83,11 +72,9 @@ export const updateOrderShop = (data) => {
     return api
       .post("update_bill_order_shop", data)
       .then((result) => {
-        console.log("update order shop", result);
         resolve(result);
       })
       .catch((error) => {
-        console.log(error);
         reject(error);
       });
   });
@@ -98,11 +85,9 @@ export const listStores = (data) => {
     return api
       .post("get_order_history_detail_pd", data)
       .then((result) => {
-        console.log("list store", result);
         resolve(result);
       })
       .catch((error) => {
-        console.log(error);
         reject(error);
       });
   });
@@ -113,11 +98,22 @@ export const GetListStore = (data) => {
     return api
       .post("get_list_store", data)
       .then((result) => {
-        console.log("list store", result);
         resolve(result);
       })
       .catch((error) => {
-        console.log(error);
+        reject(error);
+      });
+  });
+};
+
+export const GetProperties = (data) => {
+  return new Promise((resolve, reject) => {
+    return api
+      .post("get_properties", data)
+      .then((result) => {
+        resolve(result);
+      })
+      .catch((error) => {
         reject(error);
       });
   });

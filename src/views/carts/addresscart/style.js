@@ -31,11 +31,11 @@ const styles = StyleSheet.create({
     marginTop: sizeHeight(1),
   },
   infor: {
-    backgroundColor: COLOR.BUTTON,
-    paddingVertical: sizeHeight(1.5),
+    backgroundColor: "#222220",
+    paddingVertical: sizeHeight(1),
   },
   textInfor: {
-    fontSize: sizeFont(4.5),
+    fontSize: sizeFont(4),
     fontWeight: "bold",
     color: "#fff",
     marginLeft: sizeWidth(2.5),
@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
   },
   textTitle: {
     fontSize: sizeFont(4),
-    color: "#888",
+    color: "black",
   },
   textMoney: {
     fontSize: sizeFont(4),
@@ -128,6 +128,40 @@ const styles = StyleSheet.create({
     textAlign: "center",
     textDecorationLine: "underline",
   },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalView: {
+    backgroundColor: "#fff",
+    width:sizeWidth(90),
+    height:sizeHeight(40),
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 1,
+    shadowRadius: 3.84,
+  
+  },
+  textStyle: {
+    color: "black",
+    fontWeight: "bold",
+    textAlign: "center"
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: "center"
+  },
+  openButton:{
+    position:'absolute',
+    right:10,
+    top:5,
+    width:sizeWidth(7),
+    height:sizeHeight(3.5),
+  }
 });
 
 export default styles;

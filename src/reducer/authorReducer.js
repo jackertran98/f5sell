@@ -33,7 +33,6 @@ export default (state = INIT_STATE, action) => {
         username: "",
       };
     }
-
     default:
       return { ...state };
   }

@@ -9,14 +9,15 @@ const { StyleSheet } = require("react-native");
 
 const styles = StyleSheet.create({
   conatainer: {
-    backgroundColor: "#fff",
+    backgroundColor: "#E1AC06",
   },
   logo: { marginTop: sizeHeight(-5) },
+
   touchSignUp: {
     backgroundColor: COLOR.BUTTON,
     paddingVertical: sizeHeight(2),
     borderRadius: 6,
-    width: sizeWidth(85),
+    width: sizeWidth(73),
   },
   textSignUp: {
     textAlign: "center",
@@ -28,6 +29,22 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     marginTop: sizeHeight(6),
   },
+  logoSignup:{
+    marginTop:sizeHeight(5),
+    justifyContent: "center",
+    alignItems: "center",
+  },  
+  iconSignup:{
+    justifyContent: "center",
+    alignItems: "center",
+    width:sizeWidth(30),
+    height:sizeHeight(15),
+    borderRadius:100,
+    backgroundColor:'white',
+  },
+  viewSignup:{
+    
+  },  
   textFoot: { textAlign: "center", fontSize: sizeFont(4) },
 });
 

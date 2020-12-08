@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { connect } from "react-redux";
 import {
   View,
   Text,
@@ -9,7 +10,8 @@ import {
   Platform,
   TextInput,
   Animated,
-  ScrollView
+  ScrollView,
+  Button
 } from "react-native";
 import { ifIphoneX } from "react-native-iphone-x-helper";
 import styles from "./styles";
@@ -21,7 +23,7 @@ import {
 import Icon from "react-native-vector-icons/FontAwesome5";
 import { COLOR } from "../../../utils/color/colors";
 import IconComponets from "../../../components/icon";
-export default class HeaderHome extends Component {
+class HeaderHome extends Component {
   constructor(props) {
     super(props);
     this.state = {};
@@ -30,7 +32,6 @@ export default class HeaderHome extends Component {
     const { navigation } = this.props;
     navigation.navigate(text, { TITLE: title, TYPE: type });
   };
-
   render() {
     const {
       navigation,
@@ -43,137 +44,57 @@ export default class HeaderHome extends Component {
       onChange,
       loadingSear,
       deleteSearch,
+      authUser,
     } = this.props;
     return (
       <View>
         <StatusBar
           barStyle={"light-content"}
           backgroundColor={COLOR.HEADER}
-          //translucent
+        //translucent
         />
-        <View
-          style={{
-            flexDirection: "row",
-            paddingHorizontal: sizeWidth(1.5),
-            justifyContent: "center",
-            alignItems: "center",
-            alignContent: "center",
-            borderBottomColor: "#999",
-            borderBottomWidth: 1,
-          }}
-        >
-          <TouchableOpacity
-            style={styles.touchView}
-            onPress={(text) =>
-              this.handleScreen("ComponentTrend", "Sản phẩm bán chạy", 2)
-            }
-          >
-            <Image
-              source={require("../../../assets/images/icon-bestsale_2.png")}
-              style={{
-                width: sizeWidth(10),
-                height: sizeWidth(10),
-              }}
-            />
-            <Text style={styles.textView}>Sản phẩm bán chạy</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.touchView}
-            onPress={(text) =>
-              this.handleScreen("ComponentTrend", "Sản phẩm nổi bật", 1)
-            }
-          >
-            <Image
-              source={require("../../../assets/images/icon-feature_2.png")}
-              //resizeMode=
-              style={{
-                width: sizeWidth(10),
-                height: sizeWidth(10),
-              }}
-            />
-            <Text style={[styles.textView]}>Sản phẩm nổi bật</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.touchView}
-            onPress={(text) =>
-              this.handleScreen("ComponentTrend", "Sản phẩm mới", 3)
-            }
-          >
-            <Image
-              source={require("../../../assets/images/icon-new_2.png")}
-              style={{
-                width: sizeWidth(10),
-                height: sizeWidth(10),
-              }}
-            />
-            <Text style={styles.textView}>Sản phẩm mới</Text>
-          </TouchableOpacity>
-        </View>
-        <View
-          style={{
-            flexDirection: "row",
-            width: sizeWidth(95),
-            alignSelf: "center",
-            marginTop: sizeHeight(1),
-            justifyContent: "space-between",
-            alignContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <View
-            style={{
-              flexDirection: "row",
-              alignContent: "center",
-              alignItems: "center",
-              borderRadius: 6,
-              borderWidth: 1,
-              borderColor: "#ddd",
-              paddingHorizontal: sizeWidth(2),
-            }}
-          >
-            <TextInput
-              placeholder="Tìm kiếm"
-              value={search}
-              returnKeyType="search"
-              onFocus={onFocuss}
-              onBlur={() => onBlurs()}
-              onChangeText={(text) => onChange(text)}
-              returnKeyLabel="Search"
-              onSubmitEditing={async () => {
-                await loadingSear();
-                await handleSearch();
-              }}
-              style={{
-                width: sizeWidth(73),
-                paddingVertical: sizeHeight(1.2),
-              }}
-            />
-            <IconComponets
-              onPress={() => deleteSearch()}
-              name="times-circle"
-              size={sizeFont(4)}
-              color={see == false ? "#fff" : "#888"}
-              soild
-            />
-          </View>
-          <TouchableOpacity
-            onPress={() => {
-              navigation.navigate("NameItems", {
-                NAME: "Home",
-              });
-            }}
-          >
-            <Image
-              source={require("../../../assets/images/filter-2.png")}
-              style={{
-                width: sizeWidth(10),
-                height: sizeHeight(5),
-              }}
-              resizeMode="contain"
-            />
-          </TouchableOpacity>
-        </View>
+        {authUser.GROUPS === '3' ? (
+          <View style={{ margin: sizeHeight(1) }} >
+            <View style={{ height: 100, width: '100%' }}>
+              <View style={{justifyContent:'center',alignItems:'center',height: sizeHeight(4.5),width:sizeWidth(98),borderRadius: 25, backgroundColor: '#222220', }}>  
+                <Text style={{color: 'white', fontSize: 16 }}>
+                  Số dư hoa hồng hiện tại
+                </Text>
+              </View>
+              <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
+                <View style={{ flex: 1, flexDirection: 'row' }}>
+                  <Image
+                    source={require('../../../assets/images/monney.png')}
+                    style={{
+                      height: 40,
+                      width: 40
+                    }}
+                  />
+                  <Text style={{ fontSize: 20, color: '#FF5C03', alignItems: 'center', fontWeight: 'bold', paddingTop: 8, paddingLeft: 5 }}>
+                    5.000.000 đ
+                 </Text>
+                </View>
+              </View>
+            </View>
+          </View>) : null}
+        <View style={{ height: 5, backgroundColor: '#E1AC06' }}></View>
       </View>
     );
   }
 }
+
+const mapStateToProps = (state) => {
+  return {
+    status: state.authUser.status,
+    authUser: state.authUser.authUser,
+    username: state.authUser.username,
+  };
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {};
+};
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(HeaderHome);

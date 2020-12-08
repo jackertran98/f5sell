@@ -12,17 +12,17 @@ import {
   StatusBar,
   TextInput,
   Animated,
+  Image,
+  StyleSheet,
+  Alert,
 } from "react-native";
-import {
-  getListProducts,
-  getListSubChildProducts,
-} from "../../../service/products";
+import { GetListCTV } from "../../../service/account";
 import { _retrieveData } from "../../../utils/asynStorage";
-import { USER_NAME } from "../../../utils/asynStorage/store";
-import IconComponets from "../../../components/icon";
 import _ from "lodash";
-import { Image } from "react-native-elements";
-import { ListItem, Left, Body, Icon, Right, Title, Content } from "native-base";
+import { DataTable } from 'react-native-paper';
+import Header from "../../rose/header/index";
+import CtvSub from "../subchilditem/ctvsub";
+import Loading from '../../../components/loading';
 
 import {
   sizeFont,
@@ -30,13 +30,9 @@ import {
   sizeWidth,
 } from "../../../utils/helper/size.helper";
 import { COLOR } from "../../../utils/color/colors";
-import styles from "./style";
 import { connect } from "react-redux";
 import { handleMoney } from "../../../components/money";
-const HEADER_MAX_HEIGHT = sizeWidth(25);
-const HEADER_MIN_HEIGHT = 0;
-const PROFILE_IMAGE_MAX_HEIGHT = sizeWidth(10);
-const PROFILE_IMAGE_MIN_HEIGHT = 40;
+import { GetwithdrawalCTV } from "../../../service/rose";
 var numeral = require("numeral");
 
 class ListProducts extends PureComponent {
@@ -45,15 +41,45 @@ class ListProducts extends PureComponent {
     this.state = {
       stickyHeaderIndices: [0, 1, 2, 0],
       scrollY: new Animated.Value(0),
+      ListData: [],
+      data_tt: [],
+      onChangeText: '',
+      loading: false,
     };
     this.count = 0;
-}
-  componentDidMount() {}
-  handleScreen = (text, title, type) => {
-    const { navigation } = this.props;
-    navigation.navigate(text, { TITLE: title, TYPE: type });
-  };
-
+  }
+  handleLoad = async () => {
+    await GetListCTV({
+      USERNAME: this.props.username,
+      SEARCH: "",
+      ID_CITY: "",
+      I_PAGE: 1,
+      NUMOFPAGE: 50,
+      IDSHOP: this.props.idshop.USER_CODE,
+    })
+      .then((res) => {
+        console.log("get list ctv", res)
+        this.setState({
+          ListData: res.data.INFO
+        })
+      })
+      .catch((err) => { })
+    await GetwithdrawalCTV({
+      USERNAME: this.props.username,
+      PAGE: 1,
+      NUMOFPAGE: 100,
+      IDSHOP: this.props.idshop.USER_CODE
+    }).then((res) => {
+      console.log("this is GetwithdrawalCTV",res);
+      this.setState({
+        data_tt: res.data.INFO
+      })
+    })
+      .catch((err) => { })
+  }
+  componentDidMount() {
+    this.handleLoad();
+  }
   render() {
     const {
       data,
@@ -62,181 +88,105 @@ class ListProducts extends PureComponent {
       onRefreshing,
       status,
       authUser,
+      username,
     } = this.props;
-    const {
-      search,
-      see,
-      handleSearch,
-      loadingSearch,
-      onBlurs,
-      onFocuss,
-      onChange,
-      loadingSear,
-      deleteSearch,
-    } = this.props;
-    const headerHeight = this.state.scrollY.interpolate({
-      inputRange: [0, HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT],
-      outputRange: [HEADER_MAX_HEIGHT, HEADER_MIN_HEIGHT],
-      extrapolate: "extend",
-    });
-    const proflieImageHeight = this.state.scrollY.interpolate({
-      inputRange: [0, HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT],
-      outputRange: [PROFILE_IMAGE_MAX_HEIGHT, PROFILE_IMAGE_MIN_HEIGHT],
-      //extrapolate: "extend",
-    });
-    const viewHeight = this.state.scrollY.interpolate({
-      inputRange: [0, HEADER_MAX_HEIGHT - HEADER_MIN_HEIGHT],
-      outputRange: [PROFILE_IMAGE_MAX_HEIGHT, PROFILE_IMAGE_MIN_HEIGHT],
-    });
-    console.log("listItem", data);
+    const { ListData, data_tt, loading, onChangeText } = this.state;
+    console.log("data_tt",data_tt)
     return (
-      <View>
-        <View style={{margin: sizeHeight(1)}} >
-            <View style={{height:100,width:'100%'}}>
-                <Text style={{height:40,borderRadius:5,backgroundColor:'#222220',color:'white',textAlign:'center',paddingTop:8,fontSize:16}}>
-                  Số dư hoa hồng hiện tại
-                </Text>
-                <View style={{flex: 1, flexDirection: 'row',alignItems:'center'}}>
-                    <View style={{flex: 1, flexDirection: 'row'}}>
-                      <Image
-                        source={require('../../../assets/images/monney.png')}
-                        style={{
-                          height:40,
-                          width:40
-                        }}
-                      />
-                      <Text style={{fontSize:20,color:'#FF5C03',alignItems:'center',fontWeight:'bold',paddingTop:8,paddingLeft:5}}>
-                        5.000.000 đ
-                      </Text>
-                    </View>
-                    {/* <View>
-                    <Image
-                      source={require('../../../assets/images/reload.png')}
-                      style={{
-                        height:40,
-                        width:40
-                      }}
-                    />
-                    </View> */}
-                </View>
-            </View>
-              <IconComponets
-                onPress={() => deleteSearch()}
-                name="times-circle"
-                size={sizeFont(4)}
-                color={see == false ? "#fff" : "#888"}
-                soild
-              />
-        </View>
-        <View style={{ marginTop: sizeHeight(1) }}>
-          <Animated.SectionList
-            onScroll={Animated.event(
-              [{ nativeEvent: { contentOffset: { y: this.state.scrollY } } }],
-              {
-                useNativeDriver: false,
-              }
-            )}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={onRefreshing}
-              />
-            }
-            sections={data}
-            contentContainerStyle={{ paddingBottom: sizeHeight(25) }}
-            keyExtractor={(item, index) => {
-              return index;
-            }}
-            renderItem={({ item, section, index }) => {
-              if (index == section.INFO.length - 1) {
-                this.count = 0;
-              }
-
-              return this.count == 5 ? (
-                <View
-                  style={{
-                    borderBottomWidth: 8,
-                    borderBottomColor: COLOR.HEADER,
-                    paddingLeft: sizeWidth(2.5),
-                  }}
-                >
-                  <FlatList
-                    data={section.INFO}
-                    horizontal={true}
-                    renderItem={({ item, index }) => {
-                      this.count = this.count + 1;
-                      return (
-                        <TouchableOpacity
-                          style={styles.touchFlatListChild}
-                          onPress={() =>
-                            navigation.navigate("DetailProducts", {
-                              ID_PRODUCT: item.ID_PRODUCT,
-                              NAME: "Home",
-                            })
-                          }
-                        >
-                          <View
-                            style={{
-                              width: "100%",
-                              height: sizeHeight(15),
-                              justifyContent: "center",
-                            }}
-                          >
-                            <Image
-                              source={{ uri: item.IMAGE_COVER }}
-                              PlaceholderContent={<ActivityIndicator />}
-                              resizeMode="contain"
-                              style={styles.imageSize}
-                            />
-                          </View>
-                          <Text style={styles.textName}>
-                            {_.truncate(item.PRODUCT_NAME, {
-                              length: 16,
-                            })}{" "}
-                          </Text>
-                          <Text style={styles.textCode}>
-                            {item.MODEL_PRODUCT}{" "}
-                          </Text>
-                          <Text style={styles.textPrice}>
-                            {numeral(
-                              handleMoney(status, item, authUser)
-                            ).format("0,0")}
-                            VNĐ
-                          </Text>
-                        </TouchableOpacity>
-                      );
-                    }}
-                    keyExtractor={(item) => item.ID_PRODUCT.toString()}
+      <ScrollView>
+        
+          {authUser.GROUPS === "3" ? (
+            <SafeAreaView>
+              <Header />
+              <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                <Text style={{ fontSize: 18, marginTop: 10, marginBottom: 10 }}>Danh sách hoa hồng CTV</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <TextInput
+                    placeholder="Nhập mã hoặc theo tên CTV"
+                    style={{ height: 40, borderColor: '#149CC6', borderRadius: 30, borderWidth: 1, width: sizeWidth(55), paddingLeft: 20 }}
+                    onChangeText={(text) => this.setState({ onChangeText: text })}
                   />
+                  <TouchableOpacity
+                    onPress={() => {
+                      this.setState({ loading: true }, async () => {
+                        await GetListCTV({
+                          USERNAME: username,
+                          SEARCH: onChangeText,
+                          ID_CITY: "",
+                          I_PAGE: 1,
+                          NUMOFPAGE: 50,
+                          IDSHOP: this.props.idshop.USER_CODE,
+                        })
+                          .then((res) => {
+                            this.setState({
+                              ListData: res.data.INFO,
+                              loading: false
+                            })
+                          })
+                          .catch((err) => {
+                             Alert.alert('Thông báo','Không có dữ liệu')
+                           })
+                      })
+                    }}
+                    style={{ backgroundColor: '#149CC6', padding: 8, marginLeft: 15 }}
+                  >
+                    <Text>Tìm kiếm</Text>
+                  </TouchableOpacity>
                 </View>
-              ) : null;
-            }}
-            stickySectionHeadersEnabled={true}
-            // renderSectionHeader={({ section: { PARENT_NAME, ID } }) => (
-            //   <View style={styles.viewHeader}>
-            //     <Text style={styles.title}>{PARENT_NAME} </Text>
-            //     <TouchableOpacity
-            //       style={styles.touchViewMore}
-            //       onPress={() => {
-            //         navigation.navigate("ChildListItem", {
-            //           name: PARENT_NAME,
-            //           ID: ID,
-            //         });
-            //       }}
-            //     >
-            //       <Text style={styles.textViewMore}>Xem thêm...</Text>
-            //       <IconComponets
-            //         size={sizeFont(6)}
-            //         color={"#000"}
-            //         name="chevron-right"
-            //       />
-            //     </TouchableOpacity>
-            //   </View>
-            // )}
-          />
-        </View>
-      </View>
-    );
+              </View>
+              {loading === false ? 
+              <ScrollView style={{ marginTop: sizeHeight(1), height: sizeHeight(50) }}  
+              >
+                <DataTable
+                  refreshControl={
+                    <RefreshControl
+                      refreshing={refreshing}
+                      onRefresh={onRefreshing}
+                    />}
+                >
+                  <DataTable.Header >
+                    <DataTable.Title>Tên CTV</DataTable.Title>
+                    <DataTable.Title >Mã CTV</DataTable.Title>
+                    <DataTable.Title >Số dư hoa hồng</DataTable.Title>
+                    <DataTable.Title numeric>Chi tiết</DataTable.Title>
+                  </DataTable.Header>
+                  {ListData.length == 0 ? <Text></Text> : ListData.map((Val, key) => (
+                    <TouchableOpacity
+                      onPress={() => navigation.navigate("Chi tiết hoa hồng theo CTV", {
+                        ID_NAME: Val.USERNAME,
+                        ID_CODE: Val.USER_CODE
+                      })
+                      }
+                      key={key}
+                    >
+                      <DataTable.Row>
+                        <DataTable.Cell >{Val.USERNAME}</DataTable.Cell>
+                        <DataTable.Cell >{Val.USER_CODE}</DataTable.Cell>
+                        <DataTable.Cell>{numeral(Val.BALANCE).format("0,0")} đ</DataTable.Cell>
+                        <DataTable.Cell numeric>Chi tiết</DataTable.Cell>
+                      </DataTable.Row>
+                    </TouchableOpacity>
+                  ))}
+
+                </DataTable>
+              </ScrollView> : <Loading />}
+              <View style={{ height: 5, backgroundColor: '#B8C4C4' }}></View>
+              <View>
+                <Text style={{ color: '#FF0606', fontSize: 16, paddingLeft: 10 }}>Có {data_tt.length} yêu cầu thanh toán hoa hồng mới</Text>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate("Yêu cầu thanh toán")}
+                  style={{ backgroundColor: '#FF5C03', height: 40, alignItems: 'center', justifyContent: 'center' }}
+                >
+                  <Text style={{ color: 'white', fontSize: 18 }}>Xem các yêu cầu thanh toán</Text>
+                </TouchableOpacity>
+              </View>
+            </SafeAreaView>) : (
+              <View>
+                <CtvSub navigation={navigation}/>
+              </View>
+            )}
+      </ScrollView>
+    )
   }
 }
 const mapStateToProps = (state) => {
@@ -244,6 +194,7 @@ const mapStateToProps = (state) => {
     status: state.authUser.status,
     authUser: state.authUser.authUser,
     username: state.authUser.username,
+    idshop:state.product.database,
   };
 };
 
@@ -254,3 +205,13 @@ export default connect(
   mapStateToProps,
   mapDispatchToProps
 )(ListProducts);
+
+
+const styles = StyleSheet.create({
+  viewText: {
+    padding: 10,
+    lineHeight: 10,
+    borderBottomColor: '#D9E2E2',
+    borderBottomWidth: 8,
+  }
+})

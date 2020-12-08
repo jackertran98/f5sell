@@ -1,11 +1,11 @@
 import api from "../api";
 
 export const UpdateInforAccount = (data) => {
+  console.log("aaaaaaaa",data);
   return new Promise((resolve, reject) => {
     return api
       .post("edit_info_ctv", data)
       .then((result) => {
-        console.log("update ", result);
         resolve(result);
       })
       .catch((error) => {
@@ -20,7 +20,7 @@ export const GetListCTV = (data) => {
     return api
       .post("get_list_ctv", data)
       .then((result) => {
-        console.log("list ctv ", result);
+        console.log('result__',result);
         resolve(result);
       })
       .catch((error) => {
@@ -28,14 +28,13 @@ export const GetListCTV = (data) => {
         reject(error);
       });
   });
-};
+}; //using
 
-export const GetInformation = (data) => {
+export const GetInformation = (data) => {   
   return new Promise((resolve, reject) => {
     return api
       .post("get_infomation", data)
       .then((result) => {
-        console.log("get_infomation ", result);
         resolve(result);
       })
       .catch((error) => {
@@ -50,7 +49,94 @@ export const GetLevelCTV = (data) => {
     return api
       .post("get_list_discount", data)
       .then((result) => {
-        console.log("discount ", result);
+        resolve(result);
+      })
+      .catch((error) => {
+        console.log(error);
+        reject(error);
+      });
+  });
+};
+
+
+export const GetCommission = (data) => {
+  return new Promise((resolve, reject) => {
+    return api
+      .post("get_commission", data)
+      .then((result) => {
+        resolve(result);
+      })
+      .catch((error) => {
+        console.log(error);
+        reject(error);
+      });
+  });
+}; //using hoa hồng
+
+
+export const ReportCTV = (data) => {
+  return new Promise((resolve, reject) => {
+    return api
+      .post("report_ctv_detail", data)
+      .then((result) => {
+        resolve(result);
+      })
+      .catch((error) => {
+        console.log(error);
+        reject(error);
+      });
+  });
+};
+
+export const ReportDefault = (data) => {
+  return new Promise((resolve, reject) => {
+    return api
+      .post("report_default", data)
+      .then((result) => {
+        resolve(result);
+      })
+      .catch((error) => {
+        console.log(error);
+        reject(error);
+      });
+  });
+};
+
+export const ReportItem = (data) => {
+  return new Promise((resolve, reject) => {
+    return api
+      .post("report_item", data)
+      .then((result) => {
+        resolve(result);
+      })
+      .catch((error) => {
+        console.log(error);
+        reject(error);
+      });
+  });
+};
+
+
+export const ReportFluc = (data) => {
+  return new Promise((resolve, reject) => {
+    return api
+      .post("report_fluctuations", data)
+      .then((result) => {
+        resolve(result);
+      })
+      .catch((error) => {
+        console.log(error);
+        reject(error);
+      });
+  });
+};
+
+
+export const ReportCTVTT = (data) => {
+  return new Promise((resolve, reject) => {
+    return api
+      .post("report_ctv", data)
+      .then((result) => {
         resolve(result);
       })
       .catch((error) => {

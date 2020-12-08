@@ -1,16 +1,18 @@
 import { Login, updateDevice, getProfile } from "../service/auth";
-import { LOGIN_SUCCESS, LOGIN_FAIL, LOG_OUT } from "./types";
-import { _storeData } from "../utils/asynStorage";
-import { TOKEN, AUTH, USER_NAME } from "../utils/asynStorage/store";
+import {getShopInfo} from "../service/products";
+import { LOGIN_SUCCESS, LOGIN_FAIL, LOG_OUT,ID_SHOP } from "./types";
+import { _retrieveData, _storeData } from "../utils/asynStorage";
+import { TOKEN, AUTH, USER_NAME,PASSWORD,IDSHOP } from "../utils/asynStorage/store";
 
 export const LoginPhone = (data) => (dispatch) => {
   return new Promise((resolve, reject) => {
     return Login(data)
       .then((result) => {
-        console.log("Result", result.data);
-        if (result.data.ERROR == "0000") {
+        console.log("login +++",result)
+        if (result.data.ERROR === "0000") {
           Promise.all([_storeData(TOKEN, result.data.TOKEN)]);
           Promise.all([_storeData(USER_NAME, result.data.USERNAME)]);
+          Promise.all([_storeData(PASSWORD,result.data.PASSWORD)]);
           dispatch({ type: LOGIN_SUCCESS, payload: result.data });
         } else {
           dispatch({ type: LOGIN_FAIL });
@@ -18,17 +20,37 @@ export const LoginPhone = (data) => (dispatch) => {
         resolve(result);
       })
       .catch((err) => {
-        console.log(err);
         reject(err);
       });
   });
 };
 
+export const GetIdShop = (data) => (dispatch) => {
+  return new Promise((resolve, reject) => {
+    return getShopInfo(data)
+      .then((result) => {
+        console.log("result_getshop",result)
+        if (result.data.ERROR === "0000") {
+          console.log('result.data.USER_CODE',result.data.USER_CODE)
+          _storeData(IDSHOP,result.data.USER_CODE).then(()=>{
+            dispatch({ type: ID_SHOP, payload: result.data });
+          })
+        } else {
+          console.log("errr");
+        }
+        resolve(result);
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
+};
+
+
 export const UpdateDivice = (data) => (dispatch) => {
   return new Promise((resolve, reject) => {
     return updateDevice(data)
       .then((result) => {
-        console.log("Result", result.data);
         if (result.data.ERROR == "0000") {
           Promise.all([_storeData(AUTH, result.data)]);
           dispatch({ type: LOGIN_SUCCESS, payload: result.data });
@@ -38,7 +60,6 @@ export const UpdateDivice = (data) => (dispatch) => {
         resolve(result);
       })
       .catch((err) => {
-        console.log(err);
         reject(err);
       });
   });
@@ -48,9 +69,8 @@ export const GetProfile = (data) => (dispatch) => {
   return new Promise((resolve, reject) => {
     return getProfile(data)
       .then((result) => {
-        console.log("Result", result.data);
         if (result.data.ERROR == "0000") {
-          //Promise.all([_storeData(TOKEN, result.data.TOKEN)]);
+          Promise.all([_storeData(TOKEN, result.data.TOKEN)]);
           dispatch({ type: LOGIN_SUCCESS, payload: result.data });
         } else {
           dispatch({ type: LOGIN_FAIL });
@@ -58,7 +78,6 @@ export const GetProfile = (data) => (dispatch) => {
         resolve(result);
       })
       .catch((err) => {
-        console.log(err);
         reject(err);
       });
   });

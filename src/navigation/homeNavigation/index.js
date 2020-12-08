@@ -1,8 +1,6 @@
-import * as React from "react";
-import { createStackNavigator } from "@react-navigation/stack";
-import { TouchableOpacity, StyleSheet, TextInput,Image } from "react-native";
-import { createDrawerNavigator } from '@react-navigation/drawer';
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import React, { useState } from "react";
+import { createStackNavigator, CardStyleInterpolators } from "@react-navigation/stack";
+import { TouchableOpacity, StyleSheet, TextInput, Image, Easing, Linking,Platform } from "react-native";
 import Home from "../../views/home";
 import { COLOR } from "../../utils/color/colors";
 
@@ -22,64 +20,97 @@ import Carts from "../../views/carts";
 import ChildListItem from "../../views/home/childitem";
 import { connect } from "react-redux";
 import { View } from "native-base";
-import { Tooltip } from "react-native-elements";
 import DetailProducts from "../../views/home/listItem/details";
 import DetailAddressCart from "../../views/carts/addresscart";
 import ListCountries from "../../views/orders/collaborator/countries";
 import ListDistrict from "../../components/district";
-import Test from "../../components/test";
 import ListDistrictChild from "../../components/districtChild";
 import { Badge, Text } from "react-native-paper";
 import SubChildItem from "../../views/home/subchilditem";
 import ComponentTrend from "../../views/products/trend";
 import NameItems from "../../views/home/nameitem";
-import IconComponets from "../../components/icon";
-import NewItem from "../../views/products/newitem";
+import InfoCTV from "../../views/menuleft/infoctv";
+import Info from "../../views/menuleft/infoctv/usechildren";
+import EducateCTV from "../../views/account/profile/infor/traning";
+import IntroduceCTV from "../../views/account/profile/infor/introduction/Introduction";
+import NewCTV from "../../views/account/profile/infor/news/News";
+import Polycitech from "../../views/account/profile/infor/policy/Policy";
+import TitleTraning from "../../views/account/profile/infor/traning/TitleTraning";
+import DetailPolicy from "../../views/account/profile/infor/policy/DetailPolicy";
+import Product from "../productNavigation";
+import CtvDetail from "../../views/menuleft/infoctv/cvtdetail";
+import { searchHome } from "../../action/notifyAction";
+import Report from "../../views/menuleft/reportctv/index";
+import Reportall from "../../views/menuleft/reportctv/reportShop/reportAll";
+import ReportTime from "../../views/menuleft/reportctv/reportShop/reportTime";
+import ReportCTV from "../../views/menuleft/reportctv/reportShop/reportCTV";
+import ReportProduct from "../../views/menuleft/reportctv/reportShop/reportProduct";
+import DetailNew from "../../views/account/profile/infor/news/DetailNews";
+import Subchilditem from "../../views/rose/subchilditem";
+import FullItem from "../../views/home/listItem/FullItem";
+import { isIphoneX } from 'react-native-iphone-x-helper';
+import ReportDay from "../../views/menuleft/reportctv/reportShop/ReportDay";
+import SetupAccout from "../../views/menuleft/infoctv/setupaccout";
+import Editctv from "../../views/menuleft/infoctv/EditCtv";
 
-
-import { useNavigation, DrawerActions } from '@react-navigation/native'
-import AppNavigation from '../'
-const Drawer = createDrawerNavigator();
 const HomeStack = createStackNavigator();
-const Tab = createBottomTabNavigator();
 
-
+const configNavigation = {
+  // animation: "spring",
+  // config: {
+  //   stiffness: 1000,
+  //   damping: 500,
+  //   mass: 7,
+  //   overshootClamping: true,
+  //   restDisplacementThreshold: 0.01,
+  //   restSpeedThreshold: 0.01,
+  // },
+  animation: "timing",
+  config: {
+    duration: 300,
+    easing: Easing.bezier(0, 0.25, 0.5, 0.75, 1),
+  }
+}
 
 MyHomeStack = (props) => {
   const { status, navigation, route, authUser, listItem, countNotify } = props;
-  console.log({ props });
+
+  console.log("controller", countNotify);
+  const [value, setvalue] = useState('')
   if (route.state && route.state.index > 0) {
     navigation.setOptions({ tabBarVisible: false });
   } else {
     navigation.setOptions({ tabBarVisible: true });
   }
+
   return (
-    <HomeStack.Navigator>
+    <HomeStack.Navigator
+      screenOptions={{
+        transitionSpec: {
+          open: configNavigation,
+          close: configNavigation,
+        },
+        cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+
+      }}
+    >
       <HomeStack.Screen
-        name="Home"
+        name="HomePay"
         component={Home}
         options={({ route }) => ({
           title: "",
           headerStyle: {
             backgroundColor: COLOR.HEADER,
-            height: 90,
+            height: Platform.OS=="ios" ?sizeHeight(12):sizeHeight(9),
           },
           headerTitleStyle: {
             color: COLOR.HEADER,
           },
           headerTitle: () => {
             return (
-              <TextInput
-                placeholder="Tìm kiếm"
-                returnKeyType="search"
-                style={{
-                  height: 40,
-                  width: '90%',
-                  borderColor: 'white',
-                  borderWidth: 1,
-                  backgroundColor: 'white'
-                }}
-              />
+                <View style={{justifyContent:'center',alignItems:'center'}}>
+                    <Text style={{color:'white',fontSize:sizeFont(5)}}>{props.idshop.SHOP_NAME}</Text>
+                </View>
             )
           },
           headerLeft: () => (
@@ -92,27 +123,76 @@ MyHomeStack = (props) => {
                   marginLeft: 12
                 }}
               />
-
             </TouchableOpacity>
           ),
           headerRight: () => {
             return (
-              <View style={{ flexDirection: "row" }}>
-                <HeaderLeftComponet
-                  navigation={navigation}
-                  onPress={() => navigation.navigate("Thông báo")}
-                  name="shopping-cart"
-                  size={sizeFont(6)}
-                  color="#fff"
+              <View style={{ flexDirection: 'row-reverse' }}>
+                <View>
+                  <TouchableOpacity
+                    style={{marginRight: sizeWidth(3) }}
+                  >
+                    {authUser.GROUPS!=3?<HeaderLeftComponet
+                      navigation={navigation}
+                      onPress={() =>
+                        navigation.navigate("Carts", {
+                          NAME: "HomePay",
+                        })
+                      }
+                      name="shopping-cart"
+                      size={sizeFont(6)}
+                      color="white"
+                    />:null}
+                    {listItem.length != 0 ? (
+                      <View style={styles.viewList}>
+                        <Text
+                          style={{
+                            color: "#fff",
+                            textAlign: "center",
+                            fontSize: sizeFont(3),
+                          }}
+                        >
+                          {listItem.length}
+                        </Text>
+                      </View>
+                    ) : null}
+                  </TouchableOpacity>
+                </View>
+                <View>
+                  <HeaderLeftComponet
+                    navigation={navigation}
+                    onPress={() => navigation.navigate("Thông báo", {
+                      NAME: "HomePay",
+                    })}
+                    name="bell"
+                    size={sizeFont(6)}
+                    color="#fff"
+                  />
+                  {countNotify == 0 ? null : <View style={styles.viewList}>
+                    {countNotify < 100 ? <Text
+                      style={{
+                        color: "#fff",
+                        textAlign: "center",
+                        fontSize: sizeFont(3),
+                      }}
+                    >
+                      {countNotify}
+                    </Text> : <Text style={{
+                      fontSize: sizeFont(2), color: "#fff",
+                    }}>99+</Text>}
+                  </View>}
+                </View>
+                <TouchableOpacity 
+                onPress={()=>Linking.openURL('http://google.com')}
+                
+            >
+              <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                <Image
+                  source={require("../../assets/images/mess.png")}
+                  style={{ width: 30, height: 30, justifyContent: 'center', alignItems: 'center', marginLeft: sizeWidth(1) }}
                 />
-                <HeaderRightTool
-                  navigation={navigation}
-                  onPress={() => navigation.navigate("Giỏ hàng")}
-                  name="bell"
-                  size={sizeFont(6)}
-                  color="#fff"
-                  soild
-                />
+              </View>
+            </TouchableOpacity >
               </View>
             );
           },
@@ -121,7 +201,7 @@ MyHomeStack = (props) => {
       <HomeStack.Screen
         name="Thông báo"
         component={Notification}
-        options={{
+        options={({ route }) => ({
           headerTitleAlign: "center",
           headerBackTitle: null,
           headerStyle: {
@@ -133,7 +213,7 @@ MyHomeStack = (props) => {
           headerLeft: () => (
             <HeaderLeftComponet
               navigation={navigation}
-              onPress={() => navigation.navigate("Home")}
+              onPress={() => navigation.navigate(route.params.NAME)}
               name="chevron-left"
               size={sizeFont(6)}
               color="#fff"
@@ -148,9 +228,8 @@ MyHomeStack = (props) => {
               color="#fff"
             />
           ),
-        }}
+        })}
       />
-
       <HomeStack.Screen
         name="ComponentTrend"
         component={ComponentTrend}
@@ -190,7 +269,6 @@ MyHomeStack = (props) => {
           headerTitleStyle: {
             color: "#fff",
           },
-
           headerLeft: () => (
             <HeaderLeftComponet
               navigation={navigation}
@@ -200,6 +278,21 @@ MyHomeStack = (props) => {
               color="#fff"
             />
           ),
+        })}
+      />
+      <HomeStack.Screen
+        name="FullItem"
+        component={FullItem}
+        options={({ route }) => ({
+          title:"Tất cả",
+          headerTitleAlign: "center",
+          headerBackTitle: null,
+          headerStyle: {
+            backgroundColor: COLOR.HEADER,
+          },
+          headerTitleStyle: {
+            color: "#fff",
+          }
         })}
       />
       <HomeStack.Screen
@@ -215,7 +308,6 @@ MyHomeStack = (props) => {
           headerTitleStyle: {
             color: "#fff",
           },
-
           headerLeft: () => (
             <HeaderLeftComponet
               navigation={navigation}
@@ -236,7 +328,6 @@ MyHomeStack = (props) => {
           ),
         })}
       />
-
       <HomeStack.Screen
         name="DetailAddressCart"
         component={DetailAddressCart}
@@ -262,78 +353,260 @@ MyHomeStack = (props) => {
           ),
         })}
       />
+      <HomeStack.Screen
+        name="Chính sách"
+        component={Polycitech}
+        options={{
+          headerStyle: {
+            backgroundColor: COLOR.HEADER,
+          },
+          headerTintColor: '#fff',
+        }}
+      />
+      <HomeStack.Screen
+        name="report"
+        component={Report}
+        options={{
+          title: 'Báo cáo',
+          headerStyle: {
+            backgroundColor: COLOR.HEADER,
+          },
+          headerTitleAlign: "center",
+          headerTintColor: '#fff',
+        }}
+      />
+      <HomeStack.Screen
+        name="detailrose"
+        component={Subchilditem}
+        options={{
+          title: 'Chi tiết hoa hồng theo CTV',
+          headerStyle: {
+            backgroundColor: COLOR.HEADER
+          },
+          headerTintColor: '#fff',
+        }}
+      />
+      <HomeStack.Screen
+        name="setupaccout"
+        component={SetupAccout}
+        options={{
+          title: 'Chỉnh sửa thông tin CTV/ KH',
+          headerStyle: {
+            backgroundColor: COLOR.HEADER
+          },
+          headerTintColor: '#fff',
+        }}
+      />
+      <HomeStack.Screen
+        name="reportall"
+        component={Reportall}
+        options={{
+          title: 'Báo cáo chung',
+          headerStyle: {
+            backgroundColor: COLOR.HEADER,
+          },
+          headerTitleAlign: "center",
+          headerTintColor: '#fff',
+        }}
+      />
+      <HomeStack.Screen
+        name="editctv"
+        component={Editctv}
+        options={{
+          title: 'Cập nhật thông tin CTV/KH',
+          headerStyle: {
+            backgroundColor: COLOR.HEADER,
+          },
+          headerTitleAlign: "center",
+          headerTintColor: '#fff',
+        }}
+      />
+      <HomeStack.Screen
+        name="reportTime"
+        component={ReportTime}
+        options={{
+          title: 'Báo cáo theo mặt hàng',
+          headerStyle: {
+            backgroundColor: COLOR.HEADER,
+          },
+          headerTitleAlign: "center",
+          headerTintColor: '#fff',
+        }}
+      />
+      <HomeStack.Screen
+        name="reportProduct"
+        component={ReportProduct}
+        options={{
+          title: 'Báo cáo biến động',
+          headerStyle: {
+            backgroundColor: COLOR.HEADER,
+          },
+          headerTitleAlign: "center",
+          headerTintColor: '#fff',
+        }}
+      />
+      <HomeStack.Screen
+        name="Thông tin CTV"
+        component={Info}
+        options={{
+          headerStyle: {
+            backgroundColor: COLOR.HEADER,
+          },
+          headerTintColor: '#fff',
+        }}
 
+      />
+      <HomeStack.Screen
+        name="ctvdow"
+        component={InfoCTV}
+        options={{
+          title:"Danh sách CTV/ KH",
+          headerStyle: {
+            backgroundColor: COLOR.HEADER,
+          },
+          headerTintColor: '#fff',
+        }}
+
+      />
+      <HomeStack.Screen
+        name="Đào tạo"
+        component={EducateCTV}
+        options={{
+          headerStyle: {
+            backgroundColor: COLOR.HEADER,
+          },
+          headerTintColor: '#fff',
+        }}
+
+      />
+      <HomeStack.Screen
+        name="Chi tiết chính sách"
+        component={DetailPolicy}
+        options={{
+          headerStyle: {
+            backgroundColor: COLOR.HEADER,
+          },
+          headerTintColor: '#fff',
+        }}
+      />
+      <HomeStack.Screen
+        name="Chi tiết đào tạo"
+        component={TitleTraning}
+        options={{
+          headerStyle: {
+            backgroundColor: COLOR.HEADER,
+          },
+          headerTintColor: '#fff',
+        }}
+      />
+      <HomeStack.Screen
+        name="Tin tức-sự kiện"
+        component={NewCTV}
+        options={{
+          headerStyle: {
+            backgroundColor: COLOR.HEADER,
+          },
+          headerTintColor: '#fff',
+        }}
+
+      />
+      <HomeStack.Screen
+        name="detailNew"
+        component={DetailNew}
+        options={{
+          title: 'Chi tiết',
+          headerStyle: {
+            backgroundColor: COLOR.HEADER,
+          },
+          headerTintColor: '#fff',
+        }}
+
+      />
+      
+      <HomeStack.Screen
+        name="reportCTV"
+        component={ReportCTV}
+        options={{
+          title: 'Báo cáo theo CTV',
+          headerStyle: {
+            backgroundColor: COLOR.HEADER,
+          },
+          headerTintColor: '#fff',
+        }}
+
+      />
+      <HomeStack.Screen
+        name="reportday"
+        component={ReportDay}
+        options={{
+          title: 'Báo cáo chung',
+          headerStyle: {
+            backgroundColor: COLOR.HEADER,
+          },
+          headerTintColor: '#fff',
+        }}
+
+      />
+
+      <HomeStack.Screen
+        name="Product"
+        component={Product}
+        options={{
+          headerStyle: {
+            backgroundColor: COLOR.HEADER,
+          },
+          headerTintColor: '#fff',
+        }}
+      />
+      <HomeStack.Screen
+        name="Giới thiệu"
+        component={IntroduceCTV}
+        options={{
+          headerStyle: {
+            backgroundColor: COLOR.HEADER,
+          },
+          headerTintColor: '#fff',
+        }}
+      />
+      <HomeStack.Screen
+        name="Detail container"
+        component={CtvDetail}
+        options={{
+          title: "Chi tiết CTV/ KH",
+          headerStyle: {
+            backgroundColor: COLOR.HEADER,
+          },
+          headerTintColor: '#fff',
+        }}
+      />
       <HomeStack.Screen
         name="DetailProducts"
         component={DetailProducts}
         options={({ route }) => ({
-          title: "",
+          title: "Chi tiết sản phẩm",
           headerTitleAlign: "center",
           headerBackTitle: null,
-          // headerStyle: {
-          //   backgroundColor: COLOR.HEADER,
-          // },
-          // headerTitleStyle: {
-          //   color: "#fff",
-          // },
-
-          headerLeft: () => (
-            <HeaderLeftComponet
-              navigation={navigation}
-              onPress={() => navigation.navigate(route.params.NAME)}
-              name="chevron-left"
-              size={sizeFont(6)}
-              color="#000"
-              soild
-            />
-          ),
+          headerStyle: {
+            backgroundColor: COLOR.HEADER,
+          },
+          headerTintColor: '#fff',
           headerRight: () => {
-            if (status === "") {
-              return null;
-            } else
-              return authUser.GROUPS === "3" ? (
-                <View style={{ flexDirection: "row" }}>
-                  <HeaderRightComponet
-                    navigation={navigation}
-                    onPress={() => navigation.navigate("Home")}
-                    name="home"
-                    size={sizeFont(6)}
-                    color="#000"
-                    style={{
-                      marginRight: sizeWidth(-1),
-                    }}
-                  />
-                  <HeaderRightComponet
-                    navigation={navigation}
-                    onPress={() => route.params.NAVIGATE()}
-                    name="edit"
-                    size={sizeFont(5)}
-                    color="#000"
-                    style={{
-                      marginRight: sizeWidth(0),
-                    }}
-                  />
-                </View>
-              ) : (
+            return (
+                <View>
                   <TouchableOpacity
-                    style={{ flexDirection: "row", marginRight: sizeWidth(3) }}
-                    onPress={() =>
-                      navigation.navigate("Carts", {
-                        NAME: "DetailProducts",
-                      })
-                    }
+                    style={{marginRight: sizeWidth(3) }}
                   >
-                    <HeaderLeftComponet
+                    {authUser.GROUPS!=3?<HeaderLeftComponet
                       navigation={navigation}
                       onPress={() =>
                         navigation.navigate("Carts", {
-                          NAME: "DetailProducts",
+                          NAME: "HomePay",
                         })
                       }
                       name="shopping-cart"
                       size={sizeFont(6)}
-                      color="#000"
-                    />
+                      color="white"
+                    />:null}
                     {listItem.length != 0 ? (
                       <View style={styles.viewList}>
                         <Text
@@ -343,22 +616,13 @@ MyHomeStack = (props) => {
                             fontSize: sizeFont(3),
                           }}
                         >
-                          {listItem.length} {console.log(listItem.length)}
+                          {listItem.length}
                         </Text>
                       </View>
                     ) : null}
-
-                    {/**<HeaderRightTool
-                  navigation={navigation}
-                  onPress={() => navigation.navigate("Giỏ hàng")}
-                  name="edit"
-                  size={sizeFont(6)}
-                  color="#fff"
-                  soild
-                /> */}
                   </TouchableOpacity>
-                );
-          },
+                </View>
+            )}
         })}
       />
       <HomeStack.Screen
@@ -495,31 +759,7 @@ MyHomeStack = (props) => {
             ) : null,
         })}
       />
-      <HomeStack.Screen
-        name="NewItem"
-        component={NewItem}
-        options={({ route }) => ({
-          title: "Thêm sản phẩm mới",
-          headerTitleAlign: "center",
-          headerBackTitle: null,
-          headerStyle: {
-            backgroundColor: COLOR.HEADER,
-          },
-          headerTitleStyle: {
-            color: "#fff",
-          },
 
-          headerLeft: () => (
-            <HeaderLeftComponet
-              navigation={navigation}
-              onPress={() => navigation.navigate("Home")}
-              name="chevron-left"
-              size={sizeFont(6)}
-              color="#fff"
-            />
-          ),
-        })}
-      />
     </HomeStack.Navigator>
   );
 };
@@ -555,11 +795,14 @@ const mapStateToProps = (state) => {
     authUser: state.authUser.authUser,
     listItem: state.order.listItem,
     countNotify: state.notify.countNotify,
+    idshop:state.product.database,
   };
 };
 
 const mapDispatchToProps = (dispatch) => {
-  return {};
+  return {
+    searchHome: (text) => dispatch(searchHome(text))
+  };
 };
 export default connect(
   mapStateToProps,

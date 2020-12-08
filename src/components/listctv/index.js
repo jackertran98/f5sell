@@ -50,7 +50,7 @@ class ListCTV extends Component {
       LEVEL_AGENCY: "",
       I_PAGE: this.offset,
       NUMOFPAGE: 20,
-      IDSHOP: "BABU12",
+      IDSHOP: this.props.idshop.USER_CODE,
     })
       .then((result) => {
         if (result.data.ERROR === "0000") {
@@ -59,11 +59,9 @@ class ListCTV extends Component {
           );
         }
         this.setState({ loading: false });
-        console.log(result);
       })
       .catch((error) => {
         this.setState({ loading: false });
-        console.log(error);
       });
   };
 
@@ -77,20 +75,12 @@ class ListCTV extends Component {
   }
 
   onMomentumScrollBegin = () => {
-    console.log("Hello");
     this.onEndReachedCalledDuringMomentum = false;
-    console.log(this.onEndReachedCalledDuringMomentum);
   };
   onEndReached = ({ distanceFromEnd }) => {
     const { authUser } = this.props;
     const { search, cityID, picked, data } = this.state;
-    console.log(
-      "offset tone",
-      this.offset,
-      this.onEndReachedCalledDuringMomentum
-    );
     if (!this.onEndReachedCalledDuringMomentum) {
-      console.log("offset", this.offset, this.onEndReachedCalledDuringMomentum);
       this.offset = this.offset + 1;
       this.setState({ loadingMore: true }, () => {
         GetListCTV({
@@ -99,7 +89,7 @@ class ListCTV extends Component {
           LEVEL_AGENCY: picked.LEVEL_USER,
           I_PAGE: this.offset,
           NUMOFPAGE: 20,
-          IDSHOP: "BABU12",
+          IDSHOP: this.props.idshop.USER_CODE,
         })
           .then((result) => {
             if (result.data.ERROR === "0000") {
@@ -107,11 +97,9 @@ class ListCTV extends Component {
                 this.setState({ loadingMore: false })
               );
             } else this.setState({ loadingMore: false });
-            console.log(result);
           })
           .catch((error) => {
             this.setState({ loadingMore: false });
-            console.log(error);
           });
       });
       this.onEndReachedCalledDuringMomentum = true;
@@ -213,6 +201,7 @@ const mapStateToProps = (state) => {
     status: state.authUser.status,
     authUser: state.authUser.authUser,
     username: state.authUser.username,
+    idshop:state.product.database,
   };
 };
 const styles = StyleSheet.create({

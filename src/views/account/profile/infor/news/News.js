@@ -34,24 +34,23 @@ class News extends Component {
       USERNAME: authUser.USERNAME,
       TYPES: 4,
       CATEGORY: "",
-      IDSHOP: "BABU12",
+      IDSHOP: this.props.idshop.USER_CODE,
     })
       .then((result) => {
         if (result.data.ERROR === "0000") {
           this.setState(
             {
               data: result.data.INFO,
+              
             },
             () => this.setState({ loading: false })
           );
         } else {
           this.setState({ loading: false });
         }
-        console.log(result);
       })
       .catch((err) => {
         this.setState({ loading: false });
-        console.log(err);
       });
   }
   render() {
@@ -63,51 +62,60 @@ class News extends Component {
         customIndicator={<ElementCustom />}
       />
     ) : (
-      <View>
-        <FlatList
-          data={data}
-          keyExtractor={(item) => item.ID}
-          ListEmptyComponent={() => (
-            <View>
-              <Text>Không có dữ liệu</Text>
-            </View>
-          )}
-          renderItem={({ item, index }) => {
-            return (
-              <TouchableOpacity style={styles.container}>
-                <Image
-                  PlaceholderContent={<ActivityIndicator />}
-                  source={{ uri: item.IMAGE_COVER }}
-                  resizeMode="center"
-                  style={{
-                    width: sizeWidth(30),
-                    height: sizeHeight(10),
-                    flex: 1,
-                    marginRight: sizeWidth(2),
+        <View>
+          <FlatList
+            data={data}
+            keyExtractor={(item) => item.ID}
+            ListEmptyComponent={() => (
+              <View>
+                <Text>Không có dữ liệu</Text>
+              </View>
+            )}
+            renderItem={({ item, index }) => {
+              return (
+                <TouchableOpacity style={styles.container}
+                  onPress={()=>{
+                    this.props.navigation.navigate("detailNew", {
+                      item: item.ID,
+                    })
                   }}
-                />
-                <View style={{ flex: 2 }}>
-                  <View style={styles.viewTime}>
-                    <Text style={styles.textTitle}>
-                      {_.truncate(item.TITLE, {
-                        length: 26,
-                      })}{" "}
-                    </Text>
-                    <Text style={styles.textTime}>
-                      {moment(item.CREATE_DATE, "DD/MM/YYYY").format(
-                        "DD/MM/YYYY"
-                      )}{" "}
-                    </Text>
+                >
+                  <Image
+                    
+                    PlaceholderContent={<ActivityIndicator />}
+                    source={item.IMAGE_COVER == null
+                      ? require("../../../../../assets/images/camera.png")
+                      : { uri: item.IMAGE_COVER }}
+                    resizeMode="center"
+                    style={{
+                      width: sizeWidth(30),
+                      height: sizeHeight(10),
+                      flex: 1,
+                      marginRight: sizeWidth(2),
+                    }}
+                  />
+                  <View style={{ flex: 2 }}>
+                    <View style={styles.viewTime}>
+                      <Text style={styles.textTitle}>
+                        {_.truncate(item.TITLE, {
+                          length: 23,
+                        })}{" "}
+                      </Text>
+                      <Text style={styles.textTime}>
+                        {moment(item.CREATE_DATE, "DD/MM/YYYY").format(
+                          "DD/MM/YYYY"
+                        )}{" "}
+                      </Text>
+                    </View>
+                    <Text>{item.DESCRIPTION} </Text>
+                    <Text style={styles.textSee}>xem chi tiết</Text>
                   </View>
-                  <Text>{item.DESCRIPTION} </Text>
-                  <Text style={styles.textSee}>xem chi tiết</Text>
-                </View>
-              </TouchableOpacity>
-            );
-          }}
-        />
-      </View>
-    );
+                </TouchableOpacity>
+              );
+            }}
+          />
+        </View>
+      );
   }
 }
 const mapStateToProps = (state) => {
@@ -115,6 +123,7 @@ const mapStateToProps = (state) => {
     status: state.authUser.status,
     authUser: state.authUser.authUser,
     username: state.authUser.username,
+    idshop: state.product.database,
   };
 };
 

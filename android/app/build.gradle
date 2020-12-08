@@ -130,12 +130,15 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.babu"
+        applicationId "com.f5sell"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
         multiDexEnabled = true
+        manifestPlaceholders = [onesignal_app_id: "1c9dfa77-62b5-4045-a255-2f6086c7eda4",
+                                onesignal_google_project_number: "REMOTE"]
+
     }
     splits {
         abi {

@@ -19,14 +19,10 @@ export default class SearchComponent extends Component {
       <View
         style={[
           {
-            borderRadius: 6,
-            borderWidth: 1,
-            borderColor: "#999",
-            width: sizeWidth(90),
-            alignSelf: "center",
-            flexDirection: "row",
-            alignItems: "center",
-            alignContent: "center",
+            borderRadius: 50,
+            borderWidth: 3,
+            borderColor: "#E1AC06",
+            width: sizeWidth(80),
           },
           style,
         ]}
@@ -36,6 +32,7 @@ export default class SearchComponent extends Component {
         ) : null}
         <TextInput
           placeholder={placeholder}
+          autoCapitalize='characters'
           onChangeText={onChangeText}
           value={value}
           style={{

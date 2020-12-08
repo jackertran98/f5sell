@@ -26,12 +26,3 @@ export const checkPassword = (password) => {
   return schema.validate(password, { list: true });
 };
 
-// // Validate against a password string
-// console.log(schema.validate('validPASS123'));
-// // => true
-// console.log(schema.validate('invalidPASS'));
-// // => false
-
-// // Get a full list of rules which failed
-// console.log(schema.validate('joke', { list: true }));
-// // => [ 'min', 'uppercase', 'digits' ]

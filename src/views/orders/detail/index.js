@@ -74,17 +74,15 @@ class DetailsOrdered extends Component {
     await getDetailOrdered({
       USERNAME: authUser.USERNAME,
       CODE_ORDER: CODE_ORDER,
-      IDSHOP: "BABU12",
+      IDSHOP: this.props.idshop.USER_CODE,
     })
       .then((result) => {
+        console.log("data getdetailOrderd",result)
         if (result.data.ERROR == "0000") {
-          // var start = new Date(
-          //   result.data.ORDER.CREATE_DATE.toString().replace(" ", "T")
-          // );
-          //moment().toNow()
+          console.log("get_order1213",result)
           this.setState(
             {
-              data: [result.data.INFO, result.data.ORDER],
+              data: result.data.INFO,
               dayStart: moment(
                 result.data.ORDER.CREATE_DATE,
                 "DD/MM/YYYY"
@@ -104,7 +102,6 @@ class DetailsOrdered extends Component {
             },
             () => {
               this.setState({ loading: false }, () => {
-                console.log("day", this.state.dayStart);
               });
             }
           );
@@ -113,7 +110,6 @@ class DetailsOrdered extends Component {
         }
       })
       .catch((err) => {
-        console.log(err);
         this.setState({ loading: false });
       });
   };
@@ -137,7 +133,6 @@ class DetailsOrdered extends Component {
       }
     } else {
       for (let i = 0; i < item.length; i++) {
-        console.log("OOOOO", item);
         if (item[i].COST_SHIP === null && item[i].COST_SETUP === null) {
           result += parseFloat(item[i].MONEY);
         } else if (item[i].COST_SETUP === null) {
@@ -157,9 +152,6 @@ class DetailsOrdered extends Component {
   };
   changeTitle = () => {
     const { dayStart, dayEnd, statusOrser, data } = this.state;
-
-    //console.log("status", statusOrser === 0, statusOrser);
-    //alert(statusOrser);
     if (statusOrser === 0) {
       return "Đã hoàn thành";
     } else if (statusOrser === 1) return "Đã tiếp nhận";
@@ -176,7 +168,7 @@ class DetailsOrdered extends Component {
       CODE_ORDER: item.ID_CODE_ORDER,
       STATUS: statusOrser,
       NOTE: noteShop,
-      IDSHOP: "BABU12",
+      IDSHOP: this.props.idshop.USER_CODE,
     })
       .then(async (result) => {
         if (result.data.ERROR === "0000") {
@@ -196,10 +188,8 @@ class DetailsOrdered extends Component {
       })
       .catch((error) => {
         this.setState({ update: false });
-        console.log(error);
       });
   };
-  //0-shop thu tiền; 1-kho thu
   updateOrderDetailShop = (item) => {
     const { note, noteShop, statusOrser, checked, dayEnd, data } = this.state;
     const { authUser } = this.props;
@@ -208,7 +198,7 @@ class DetailsOrdered extends Component {
       CODE_ORDER: item.ID_CODE_ORDER,
       STATUS: statusOrser,
       NOTE: noteShop,
-      IDSHOP: "BABU12",
+      IDSHOP: this.props.idshop.USER_CODE,
       ID: item.ID_CODE_ORDER,
       TIME_RECEIVER: dayEnd,
       UNIT: checked === false ? 0 : 1,
@@ -231,7 +221,6 @@ class DetailsOrdered extends Component {
       })
       .catch((error) => {
         this.setState({ update: false });
-        console.log(error);
       });
   };
 
@@ -263,10 +252,10 @@ class DetailsOrdered extends Component {
       noteShop,
       update,
     } = this.state;
+
+    console.log("datais fall",data)
     const { authUser, navigation } = this.props;
     const { TYPE, NAME } = this.props.route.params;
-
-    console.log("order", data);
     return loading ? (
       <Spinner
         visible={loading}
@@ -622,8 +611,6 @@ class DetailsOrdered extends Component {
               minimumDate={new Date()}
               onConfirm={(day) => {
                 this.handleDate(day, this.type);
-
-                console.log(day);
               }}
               onCancel={() => this.setState({ showCalendar: false })}
             />
@@ -652,6 +639,7 @@ const mapStateToProps = (state) => {
     status: state.authUser.status,
     authUser: state.authUser.authUser,
     username: state.authUser.username,
+    idshop: state.product.database,
   };
 };
 

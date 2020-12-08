@@ -62,13 +62,11 @@ class MangeStore extends Component {
       ID_CITY: cityID,
       I_PAGE: 10,
       NUMOFPAGE: this.offset,
-      IDSHOP: "BABU12",
+      IDSHOP: this.props.idshop.USER_CODE,
     })
       .then((result) => {
-        console.log(result);
       })
       .catch((error) => {
-        console.log(error);
       });
   };
   componentDidMount() {
@@ -134,6 +132,7 @@ const mapStateToProps = (state) => {
     status: state.authUser.status,
     authUser: state.authUser.authUser,
     username: state.authUser.username,
+    idshop: state.product.database,
   };
 };
 const styles = StyleSheet.create({

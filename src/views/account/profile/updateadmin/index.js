@@ -47,14 +47,10 @@ class UpdateAccount extends Component {
   }
   handleImage = () => {
     ImagePicker.showImagePicker(options, async (response) => {
-      console.log("Response = ", response);
 
       if (response.didCancel) {
-        console.log("User cancelled image picker");
       } else if (response.error) {
-        console.log("ImagePicker Error: ", response.error);
       } else if (response.customButton) {
-        console.log("User tapped custom button: ", response.customButton);
       } else {
         const source = { uri: response.uri };
 
@@ -66,8 +62,6 @@ class UpdateAccount extends Component {
           },
           () => this.upload(source, response.data)
         );
-
-        console.log("image", response);
       }
     });
   };
@@ -89,9 +83,7 @@ class UpdateAccount extends Component {
       })
         .then(async (res) => {
           let responseJson = await res.json();
-          console.log(responseJson);
           if (responseJson.ERROR == "0000") {
-            console.log("Upload Successful", responseJson.URL);
 
             this.setState(
               {
@@ -117,7 +109,6 @@ class UpdateAccount extends Component {
           }
         })
         .catch((err) => {
-          console.log("err", err);
           this.setState({ loading: false });
         });
     }
@@ -150,7 +141,7 @@ class UpdateAccount extends Component {
       TENTK: null,
       TENNH: null,
       AVATAR: imageAvatar,
-      IDSHOP: "BABU12",
+      IDSHOP: this.props.idshop.USER_CODE,
       CMT: null,
       IMG1: null,
       IMG2: null,
@@ -159,7 +150,6 @@ class UpdateAccount extends Component {
       NEW_PWD: newPassword,
     })
       .then((result) => {
-        console.log("update", result);
         if (result.data.ERROR === "00000") {
           this.setState(
             {
@@ -168,15 +158,13 @@ class UpdateAccount extends Component {
             () => {
               this.props
                 .GetProfile({
-                  IDSHOP: "BABU12",
+                  IDSHOP: this.props.idshop.USER_CODE,
                   USER_CTV: this.props.authUser.USERNAME,
                   USERNAME: this.props.authUser.USERNAME,
                 })
                 .then((result) => {
-                  //console.log(result, "login");
                 })
                 .catch((error) => {
-                  console.log(error);
                   this.setState({ loading: false });
                 });
               this.message = setTimeout(
@@ -195,7 +183,7 @@ class UpdateAccount extends Component {
                 () =>
                   AlertCommon("Thông báo", result.data.RESULT, () => {
                     this.props.navigation.popToTop();
-                    this.props.navigation.navigate("Home");
+                    this.props.navigation.navigate("home");
                   }),
                 10
               );
@@ -205,7 +193,6 @@ class UpdateAccount extends Component {
       })
       .catch((error) => {
         this.setState({ loading: false });
-        console.log(error);
       });
   };
   render() {
@@ -219,7 +206,6 @@ class UpdateAccount extends Component {
       loading,
       imageAvatar,
     } = this.state;
-    console.log(this.props);
     const { authUser } = this.props;
     return (
       <ScrollView keyboardShouldPersistTaps="handled">
@@ -403,6 +389,7 @@ const mapStateToProps = (state) => {
     status: state.authUser.status,
     authUser: state.authUser.authUser,
     username: state.authUser.username,
+    idshop: state.product.database,
   };
 };
 

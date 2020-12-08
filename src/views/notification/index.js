@@ -15,6 +15,11 @@ import { getListNotify } from "../../service/notify";
 import { connect } from "react-redux";
 import Spinner from "react-native-loading-spinner-overlay";
 import moment from "moment";
+
+import "moment/min/moment-with-locales";
+moment.locale('vi');
+moment().format("ll");
+
 import {
   sizeHeight,
   sizeWidth,
@@ -41,10 +46,8 @@ class Notification extends Component {
     this.onEndReachedCalledDuringMomentum = true;
   }
   onMomentumScrollBegin = () => {
-    console.log("Hello");
     this.onEndReachedCalledDuringMomentum = false;
     //alert("1");
-    console.log(this.onEndReachedCalledDuringMomentum);
   };
   onRefresh = () => {
     const { authUser } = this.props;
@@ -52,10 +55,9 @@ class Notification extends Component {
       USERNAME: authUser.USERNAME,
       PAGE: this.offset,
       NUMOFPAGE: 15,
-      IDSHOP: "BABU12",
+      IDSHOP: this.props.idshop.USER_CODE,
     })
       .then((result) => {
-        console.log("Result", result);
         if (result.data.ERROR === "0000") {
           this.setState({ data: result.data.INFO }, () => {
             this.props.countNotify(result.data.SUM_NOT_READ);
@@ -65,13 +67,11 @@ class Notification extends Component {
         }
       })
       .catch((error) => {
-        console.log(error);
       });
   };
   handleLoad = () => {
     const { authUser } = this.props;
     this.setState({ loadMore: true }, () => {
-      console.log("page", this.offset, this.onEndReachedCalledDuringMomentum);
       if (!this.onEndReachedCalledDuringMomentum) {
         //alert("1");
         this.offset = this.offset + 1;
@@ -79,10 +79,9 @@ class Notification extends Component {
           USERNAME: authUser.USERNAME,
           PAGE: this.offset,
           NUMOFPAGE: 15,
-          IDSHOP: "BABU12",
+          IDSHOP: this.props.idshop.USER_CODE,
         })
           .then((result) => {
-            console.log("Result", result);
             if (result.data.ERROR === "0000") {
               this.setState(
                 { data: _.concat(this.state.data, result.data.INFO) },
@@ -99,7 +98,6 @@ class Notification extends Component {
           })
           .catch((error) => {
             this.setState({ loadMore: false });
-            console.log(error);
           });
         this.onEndReachedCalledDuringMomentum = true;
       } else {
@@ -118,10 +116,10 @@ class Notification extends Component {
       USERNAME: authUser.USERNAME,
       PAGE: this.offset,
       NUMOFPAGE: 15,
-      IDSHOP: "BABU12",
+      IDSHOP: this.props.idshop.USER_CODE,
     })
       .then((result) => {
-        console.log("Result", result);
+        console.log("this is getListNotify",result);
         if (result.data.ERROR === "0000") {
           this.setState({ data: result.data.INFO }, () => {
             this.setState({
@@ -137,7 +135,6 @@ class Notification extends Component {
         }
       })
       .catch((error) => {
-        console.log(error);
       });
   }
   componentWillUnmount() {
@@ -145,7 +142,6 @@ class Notification extends Component {
   }
   render() {
     const { data, loading, loadMore } = this.state;
-    console.log("status", data, loadMore);
     return loading ? (
       <Spinner
         visible={loading}
@@ -162,6 +158,7 @@ class Notification extends Component {
           onRefresh={this.onRefresh}
           navigation={this.props.navigation}
         />
+        
       </View>
     );
   }
@@ -171,6 +168,7 @@ const mapStateToProps = (state) => {
     status: state.authUser.status,
     authUser: state.authUser.authUser,
     username: state.authUser.username,
+    idshop: state.product.database,
   };
 };
 

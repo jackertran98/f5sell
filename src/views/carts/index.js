@@ -15,7 +15,7 @@ import {
 } from "../../utils/helper/size.helper";
 import { COLOR } from "../../utils/color/colors";
 import { connect } from "react-redux";
-import { addToCart, removeAllToCart } from "../../action/orderAction";
+import { addToCart, removeAllToCart, removeToCart } from "../../action/orderAction";
 import { AlertCommonLogin } from "../../components/error";
 import styles from "./style";
 import IconComponets from "../../components/icon";
@@ -29,6 +29,7 @@ class Carts extends Component {
       loading: true,
       SUM: 0,
       ok: false,
+      rose: 0,
     };
   }
   countPlus = (item) => {
@@ -37,8 +38,6 @@ class Carts extends Component {
     this.setState({
       SUM: this.state.SUM + parseInt(handleMoney(status, item, authUser)),
     });
-
-    //console.log(item);
 
     //this.setState({ count: this.state.count + 1 });
   };
@@ -62,13 +61,16 @@ class Carts extends Component {
       status,
     } = this.props;
     var Sum = 0;
+    var rose = 0;
     for (let i = 0; i < listItem.length; i++) {
       listItem[i].COUNT = 1;
       Sum += parseInt(handleMoney(status, listItem[i], authUser));
+      // rose += parseInt(handleMoney(status, listItem[i], authUser)) * (parseInt(listItem[i].COMISSION_PRODUCT) / 100);
+      rose += parseInt(listItem[i].HHMAX);
     }
-    console.log(navigation, "Hello");
     this.setState({
       SUM: Sum,
+      rose: rose,
     });
     navigation.setParams({
       onDelete: () =>
@@ -84,8 +86,8 @@ class Carts extends Component {
   }
   render() {
     const { listItem, authUser, status } = this.props;
-    const { count, SUM } = this.state;
-    console.log(listItem);
+    const { count, SUM, rose } = this.state;
+    console.log("abc ", listItem);
     return (
       <View style={{ flex: 1 }}>
         <View style={{ flex: 1.2 }}>
@@ -112,37 +114,45 @@ class Carts extends Component {
                     />
                   </View>
                   <View style={{ marginTop: sizeHeight(3), flex: 3 }}>
+                   <View >
+                      <Text
+                        onPress={() => {
+                          AlertCommonLogin(
+                            "Xác nhận",
+                            "Bạn có chắc chắn muốn xoá đơn hàng ?",
+                            () => null,
+                            () => this.props.removeToCart(item),
+                            "Huỷ bỏ",
+                            "Đồng ý"
+                          )
+                          
+                        }}
+                        style={{position:'absolute',right:5,fontSize:sizeFont(8),top:-20,color:'red'}}>x</Text>
+                   </View>
                     <Text
                       style={{
                         fontSize: sizeFont(4),
                         marginLeft: sizeWidth(2),
+                        width:sizeWidth(60),
                         paddingBottom: sizeHeight(1),
                         fontWeight: "bold",
                       }}
                     >
                       {item.PRODUCT_NAME}
                     </Text>
-
-                    <View style={styles.viewChildDetail}>
-                      <Text style={styles.textTitle}>Mã SP:</Text>
-                      <Text
-                        style={{ fontSize: sizeFont(4), fontWeight: "bold" }}
-                      >
-                        {item.MODEL_PRODUCT}{" "}
-                      </Text>
-                    </View>
                     <View style={styles.viewChildDetail}>
                       <Text style={styles.textTitle}>Thuộc tính:</Text>
                       <IconComponets
                         name="edit"
                         size={sizeFont(6)}
                         color={COLOR.BUTTON}
+                        onPress={() => { console.log('gio hang') }}
                       />
                     </View>
                     <View style={styles.viewChildDetail}>
                       <Text style={styles.textTitle}>Đơn giá:</Text>
                       <Text
-                        style={{ fontSize: sizeFont(4), color: COLOR.BUTTON }}
+                        style={{ fontSize: sizeFont(4), color: "#F90000", fontWeight: "bold" }}
                       >
                         {numeral(handleMoney(status, item, authUser)).format(
                           "0,0"
@@ -185,7 +195,7 @@ class Carts extends Component {
 
         <SafeAreaView
           style={{
-            flex: 0.3,
+            flex: 0.5,
             borderTopWidth: 4,
             borderTopColor: "#ddd",
           }}
@@ -201,16 +211,33 @@ class Carts extends Component {
             <Text style={{ fontSize: sizeFont(4), fontWeight: "bold" }}>
               Tổng tiền
             </Text>
-            <Text style={{ fontSize: sizeFont(4), fontWeight: "bold" }}>
+            <Text style={{ fontSize: sizeFont(4), fontWeight: "bold", color: "#F90000" }}>
               {numeral(listItem.length === 0 ? 0 : SUM).format("0,0")} VNĐ
             </Text>
           </View>
+          {this.props.authUser.GROUPS == 8 ? null : <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              marginVertical: sizeHeight(2),
+              paddingHorizontal: sizeWidth(2),
+            }}
+          >
+            <Text style={{ fontSize: sizeFont(4), fontWeight: "bold" }}>
+              Hoa hồng tổng
+            </Text>
+            <Text style={{ fontSize: sizeFont(4), fontWeight: "bold", color: "#149CC6" }}>
+              {numeral(listItem.length === 0 ? 0 : rose).format("0,0")} VNĐ
+            </Text>
+          </View>}
+          <Text style={{ fontSize: 14, paddingLeft: 10, fontStyle: 'italic' }}>(Hoa hồng được cộng sau khi hoàn thành đơn hàng)</Text>
           <View style={{ alignSelf: "center", marginTop: sizeHeight(2) }}>
             <TouchableOpacity
               style={{
-                backgroundColor: listItem.length == 0 ? "#ddd" : COLOR.BUTTON,
-                paddingVertical: sizeHeight(2),
-                borderRadius: 6,
+                backgroundColor: listItem.length == 0 ? "#ddd" : "#149CC6",
+                paddingVertical: sizeHeight(1),
+                height: sizeHeight(5),
+                borderRadius: 4,
                 width: sizeWidth(80),
               }}
               disabled={listItem.length == 0 ? true : false}
@@ -219,6 +246,7 @@ class Carts extends Component {
                   SUM: this.state.SUM,
                   NAME: "Carts",
                   NUM: this.state.count,
+                  LIST:listItem,
                 });
               }}
             >
@@ -249,6 +277,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
+    removeToCart: (text) => dispatch(removeToCart(text)),
     addToCart: (text) => dispatch(addToCart(text)),
     removeAllToCart: (text) => dispatch(removeAllToCart()),
   };

@@ -50,11 +50,9 @@ export class HeaderRightComponet extends Component {
     super(props);
   }
   componentDidMount() {
-    console.log("okokokoko", this.props);
   }
   render() {
     const { navigation, onPress, name, size, color, style } = this.props;
-    console.log(this.props);
     return (
       <TouchableOpacity
         onPress={onPress}
@@ -137,7 +135,6 @@ export class HeaderRightTool extends Component {
       onPressTwo,
       onPressThree,
     } = this.props;
-    console.log(this.props);
     return (
       <Menu ref={(ref) => (this.tool = ref)}>
         <MenuTrigger
@@ -235,7 +232,6 @@ export class ButtonShowStore extends Component {
       style,
       onPressOne,
     } = this.props;
-    console.log(this.props);
     return (
       <Menu ref={(ref) => (this.tool = ref)}>
         <MenuTrigger

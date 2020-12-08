@@ -37,7 +37,7 @@ class About extends Component {
       USERNAME: authUser.USERNAME,
       TYPES: 1,
       CATEGORY: "",
-      IDSHOP: "BABU12",
+      IDSHOP: id.USER_CODE,
     })
       .then((result) => {
         if (result.data.ERROR === "0000") {
@@ -50,11 +50,9 @@ class About extends Component {
         } else {
           this.setState({ loading: false });
         }
-        console.log(result);
       })
       .catch((err) => {
         this.setState({ loading: false });
-        console.log(err);
       });
   }
   render() {
@@ -110,7 +108,7 @@ class About extends Component {
                     PlaceholderContent={<ActivityIndicator />}
                     source={
                       item.IMAGE_COVER == null
-                        ? require("../../../assets/images/logo.png")
+                        ? require("../../../assets/images/camera.png")
                         : { uri: item.IMAGE_COVER }
                     }
                     resizeMode="contain"
@@ -130,6 +128,7 @@ const mapStateToProps = (state) => {
     status: state.authUser.status,
     authUser: state.authUser.authUser,
     username: state.authUser.username,
+    idshop:state.product.database,
   };
 };
 

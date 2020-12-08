@@ -40,7 +40,7 @@ class PolicyAgent extends Component {
       USERNAME: authUser.USERNAME,
       TYPES: 2,
       CATEGORY: "",
-      IDSHOP: "BABU12",
+      IDSHOP: id.USER_CODE,
     })
       .then((result) => {
         if (result.data.ERROR === "0000") {
@@ -53,11 +53,9 @@ class PolicyAgent extends Component {
         } else {
           this.setState({ loading: false });
         }
-        console.log(result);
       })
       .catch((err) => {
         this.setState({ loading: false });
-        console.log(err);
       });
   }
   render() {
@@ -103,6 +101,7 @@ const mapStateToProps = (state) => {
     status: state.authUser.status,
     authUser: state.authUser.authUser,
     username: state.authUser.username,
+    idshop:state.product.database,
   };
 };
 const styles = StyleSheet.create({

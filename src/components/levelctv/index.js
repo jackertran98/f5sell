@@ -23,7 +23,7 @@ export default class LevelCTV extends Component {
   }
   handleLevelCTV = () => {
     GetLevelCTV({
-      IDSHOP: "BABU12",
+      IDSHOP: "ABC123",
     })
       .then((result) => {
         if (result.data.ERROR === "0000") {
@@ -33,11 +33,9 @@ export default class LevelCTV extends Component {
         } else {
           this.setState({ loadingSlow: false });
         }
-        console.log("discount", result.data);
       })
       .catch((error) => {
         this.setState({ loadingSlow: false });
-        console.log(error);
       });
   };
   componentDidMount() {

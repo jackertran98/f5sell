@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { View, Text, FlatList, StyleSheet } from "react-native";
+import { View, Text, FlatList, StyleSheet, TouchableOpacity } from "react-native";
 import { GetInformation } from "../../../../../service/account";
 import { connect } from "react-redux";
 import { ElementCustom } from "../../../../../components/error";
@@ -24,10 +24,10 @@ class Tranning extends Component {
     GetInformation({
       USERNAME: authUser.USERNAME,
       TYPES: 3,
-      IDSHOP: "BABU12",
+      IDSHOP: this.props.idshop.USER_CODE,
     })
       .then((result) => {
-        console.log(result);
+        console.log("dào tạo",result)
         if (result.data.ERROR === "0000") {
           this.setState(
             {
@@ -41,12 +41,12 @@ class Tranning extends Component {
       })
       .catch((err) => {
         this.setState({ loading: false });
-        console.log(err);
       });
   }
   Î;
   render() {
     const { loading, data } = this.state;
+    console.log("this is data", data)
     return loading ? (
       <Spinner
         visible={loading}
@@ -54,39 +54,47 @@ class Tranning extends Component {
         customIndicator={<ElementCustom />}
       />
     ) : (
-      <View>
-        <FlatList
-          data={data}
-          keyExtractor={(item) => item.ID}
-          renderItem={({ item, index }) => {
-            return (
-              <View style={styles.viewContainer}>
-                <IconComponets
-                  name="folder-open"
-                  size={sizeFont(5)}
-                  color="#888"
-                  style={{ marginRight: sizeWidth(2) }}
-                />
-                <Text style={styles.textTitle}>
-                  {_.truncate(item.TITLE, {
-                    length: 40,
-                  })}{" "}
-                </Text>
-                <IconComponets
-                  name="pen"
-                  size={sizeFont(5)}
-                  color="#888"
-                  style={{
-                    position: "absolute",
-                    right: sizeWidth(2.5),
+        <View>
+          <FlatList
+            data={data}
+            keyExtractor={(item) => item.ID}
+            renderItem={({ item, index }) => {
+              return (
+                <TouchableOpacity
+                  onPress={() => {
+                    this.props.navigation.navigate("Chi tiết đào tạo", {
+                      dataID: item.ID,  
+                    });
                   }}
-                />
-              </View>
-            );
-          }}
-        />
-      </View>
-    );
+                >
+                  <View style={styles.viewContainer}>
+                    <IconComponets
+                      name="folder-open"
+                      size={sizeFont(5)}
+                      color="#888"
+                      style={{ marginRight: sizeWidth(2) }}
+                    />
+                    <Text style={styles.textTitle}>
+                      {_.truncate(item.TITLE, {
+                        length: 40,
+                      })}{" "}
+                    </Text>
+                    <IconComponets
+                      name="pen"
+                      size={sizeFont(5)}
+                      color="#888"
+                      style={{
+                        position: "absolute",
+                        right: sizeWidth(2.5),
+                      }}
+                    />
+                  </View>
+                </TouchableOpacity>
+              );
+            }}
+          />
+        </View>
+      );
   }
 }
 const mapStateToProps = (state) => {
@@ -94,6 +102,7 @@ const mapStateToProps = (state) => {
     status: state.authUser.status,
     authUser: state.authUser.authUser,
     username: state.authUser.username,
+    idshop: state.product.database,
   };
 };
 

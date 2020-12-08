@@ -12,7 +12,6 @@ import { COLOR } from "../../utils/color/colors";
 export default class AlertDesignNotification extends PureComponent {
   render() {
     let { showAlert, onClose, message, title } = this.props;
-    // console.log('U', showAlert);
     return showAlert ? (
       <Portal>
         <Dialog

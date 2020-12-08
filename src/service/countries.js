@@ -5,11 +5,9 @@ export const GetCity = (data) => {
     return api
       .post("get_city", data)
       .then((result) => {
-        console.log("get city", result);
         resolve(result);
       })
       .catch((error) => {
-        console.log(error);
         reject(error);
       });
   });
@@ -20,11 +18,9 @@ export const GetDistrict = (data) => {
     return api
       .post("get_district", data)
       .then((result) => {
-        console.log("get district", result);
         resolve(result);
       })
       .catch((error) => {
-        console.log(error);
         reject(error);
       });
   });
@@ -35,11 +31,9 @@ export const GetDistrictChild = (data) => {
     return api
       .post("get_ward", data)
       .then((result) => {
-        console.log("get district child", result);
         resolve(result);
       })
       .catch((error) => {
-        console.log(error);
         reject(error);
       });
   });

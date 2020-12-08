@@ -6,6 +6,10 @@ import {
   TouchableOpacity,
   TextInput,
   Platform,
+  Alert,
+  Keyboard,
+  Modal,
+  Image
 } from "react-native";
 import { connect } from "react-redux";
 import { Provider } from "react-native-paper";
@@ -15,11 +19,14 @@ import {
   sizeFont,
   sizeWidth,
 } from "../../../utils/helper/size.helper";
+import {
+  checkFullName,
+  isVietnamesePhoneNumber,
+  alphanumeric,
+} from "../../../utils/check";
 import { COLOR } from "../../../utils/color/colors";
 import styles from "./style";
 import { FormTextInput } from "../../../components/textinput";
-import AlertDesignNotification from "../../../components/alert/AlertDesignNotification";
-import IconComponets from "../../../components/icon";
 import { orderProduct } from "../../../service/order";
 import { AlertCommon } from "../../../components/error";
 import Loading from "../../../components/loading";
@@ -39,23 +46,23 @@ class DetailAddressCart extends Component {
         this.props.authUser.CITY == null
           ? ""
           : {
-              NAME: this.props.authUser.CITY,
-              MATP: this.props.authUser.CITY_ID,
-            },
+            NAME: this.props.authUser.CITY,
+            MATP: this.props.authUser.CITY_ID,
+          },
       district:
         this.props.authUser.DISTRICT == null
           ? ""
           : {
-              NAME: this.props.authUser.DISTRICT,
-              MAQH: this.props.authUser.DISTRICT_ID,
-            },
+            NAME: this.props.authUser.DISTRICT,
+            MAQH: this.props.authUser.DISTRICT_ID,
+          },
       districChild:
         this.props.authUser.WARD == null
           ? ""
           : {
-              NAME: this.props.authUser.WARD,
-              XAID: this.props.authUser.WARD_ID,
-            },
+            NAME: this.props.authUser.WARD,
+            XAID: this.props.authUser.WARD_ID,
+          },
       address: this.props.authUser.ADDRESS,
       passport: "",
       account: "",
@@ -67,6 +74,11 @@ class DetailAddressCart extends Component {
       SUM: this.props.route.params.SUM,
       message: "",
       loading: false,
+      value: false,
+      shipcode: false,
+      Numbercode: 'CK',
+      money: '',
+      modalVisible: false,
     };
     this.message = "";
   }
@@ -75,7 +87,6 @@ class DetailAddressCart extends Component {
       this.setState({ city: "", district: "", districChild: "" });
     } else {
       this.setState({ city: text, district: "", districChild: "" }, () => {
-        console.log(this.state.district, "2020202020202020");
       });
     }
   };
@@ -89,31 +100,8 @@ class DetailAddressCart extends Component {
       this.setState({ districChild: "" });
     } else this.setState({ districChild: text });
   };
-  handleImage = () => {
-    ImagePicker.showImagePicker(options, async (response) => {
-      console.log("Response = ", response);
-
-      if (response.didCancel) {
-        console.log("User cancelled image picker");
-      } else if (response.error) {
-        console.log("ImagePicker Error: ", response.error);
-      } else if (response.customButton) {
-        console.log("User tapped custom button: ", response.customButton);
-      } else {
-        const source = { uri: response.uri };
-
-        // You can also display the image using data:
-        // const source = { uri: 'data:image/jpeg;base64,' + response.data };
-
-        this.setState({
-          loading: true,
-        });
-      }
-    });
-  };
   handleNumber = (item) => {
     const { status, authUser } = this.props;
-    console.log("oooo", item);
     var resutl = {
       AMOUNT: "",
       PRICE: "",
@@ -130,12 +118,10 @@ class DetailAddressCart extends Component {
         resutl.MONEY +
         handleMoney(status, item[i], authUser) * parseInt(item[i].COUNT) +
         "#";
-      resutl.BONUS = resutl.BONUS + item[i].PRICE_PROMOTION + "#";
+      resutl.BONUS = resutl.BONUS + item[i].PRICE * item[i].COMISSION_PRODUCT * 0.01 + "#";
       resutl.ID_PRODUCT_PROPERTIES =
         resutl.ID_PRODUCT_PROPERTIES + item[i].ID_PRODUCT_PROPERTIES + "#";
-      console.log("item[i]", resutl);
     }
-    console.log("result", resutl);
     resutl.BONUS = resutl.BONUS.substring(0, resutl.BONUS.length - 1);
     resutl.AMOUNT = resutl.AMOUNT.substring(0, resutl.AMOUNT.length - 1);
     resutl.CODE_PRODUCT = resutl.CODE_PRODUCT.substring(
@@ -151,89 +137,145 @@ class DetailAddressCart extends Component {
 
     return resutl;
   };
+  endMoney = () => {
+    const { listItem } = this.props;
+    const { money } = this.state;
+    var sum = 0;
+    for (let i = 0; i < listItem.length; i++) {
+      sum += listItem[i].PRICE - money;
+    }
+    return numeral(sum).format(
+      "0,0"
+    );
+  }
+  endRose = () => {
+    const { money } = this.state;
+    const { listItem } = this.props;
+    var sumMoney = 0;
+    for (let i = 0; i < listItem.length; i++) {
+      sumMoney +=
+        parseFloat(listItem[i].HHMAX);
+    }
+
+    return numeral(sumMoney - money).format(
+      "0,0"
+    );
+  }
   handleBook = () => {
     const {
       phoneText,
       userName,
       city,
       district,
-      districChild,
       address,
+      Numbercode,
+      districChild,
+      money,
       note,
-      showAlert,
-      SUM,
-      checked,
     } = this.state;
-    const { listItem, authUser } = this.props;
+    const { listItem, authUser, navigation } = this.props;
     const { item } = this.props.route.params;
+    Keyboard.dismiss();
+    if (
+      userName.trim() == "" ||
+      checkFullName(userName) ||
+      userName.length > 50
+    ) {
+      AlertCommon(
+        "Thông báo",
+        "Họ và tên không chứa ký tự đặc biệt và không quá 50 ký tự",
+        () => null
+      );
+    } else if (address.length > 100) {
+      AlertCommon(
+        "Thông báo",
+        "Không cho nhập quá 100 ký tự",
+        () => null
+      );
+    }
+    else if (!isVietnamesePhoneNumber(phoneText)) {
+      AlertCommon(
+        "Thông báo",
+        "Số điện thoại không hợp lệ",
+        () => null
+      );
+    }
+    else if (address.length > 100) {
+      AlertCommon(
+        "Thông báo",
+        "Bạn đã nhập quá 100 ký tự cho phép",
+        () => null
+      );
+    }
 
-    this.setState(
-      {
-        loading: true,
-        message: "",
-      },
-      async () => {
-        var result;
-        if (item == undefined) {
-          result = await this.handleNumber(listItem);
-        } else {
-          result = await this.handleNumber(item);
-        }
-
-        console.log("city", result);
-        orderProduct({
-          USERNAME: authUser.USERNAME,
-          CODE_PRODUCT: result.CODE_PRODUCT,
-          AMOUNT: result.AMOUNT,
-          PRICE: result.PRICE,
-          MONEY: result.MONEY,
-          BONUS: result.BONUS,
-          FULL_NAME: userName,
-          MOBILE_RECEIVER: phoneText,
-          ID_CITY: city.MATP,
-          ID_DISTRICT: district.MAQH,
-          ADDRESS: address,
-          IDSHOP: "BABU12",
-          DISTCOUNT: "",
-          NOTE: note,
-          ID_PRODUCT_PROPERTIES: "",
-          ID_WARD: districChild.XAID,
-          ISSETUP: checked ? 1 : 0,
-        })
-          .then((result) => {
-            console.log("order", result);
-            if (result.data.ERROR == "0000") {
-              this.setState(
-                {
-                  loading: false,
-                  message: result.data.RESULT,
-                },
-                () => {
-                  this.props.removeAllToCart();
-                  return AlertCommon("Thông báo", "Đặt hàng thành công", () =>
-                    this.props.navigation.navigate("Home")
-                  );
-                }
-              );
-            } else {
-              this.setState(
-                {
-                  loading: false,
-                  message: result.data.RESULT,
-                },
-                () => {
-                  return AlertCommon("Thông báo", "Đặt hàng thất bại", () =>
-                    this.props.navigation.navigate("Home")
-                  );
-                }
-              );
-            }
+    else {
+      this.setState(
+        {
+          loading: true,
+          message: "",
+        },
+        async () => {
+          var result;
+          if (item == undefined) {
+            result = await this.handleNumber(listItem);
+          } else {
+            result = await this.handleNumber(item);
+          }
+          orderProduct({
+            USERNAME: authUser.USERNAME,
+            CODE_PRODUCT: result.CODE_PRODUCT,
+            AMOUNT: result.AMOUNT,
+            PRICE: result.PRICE,
+            MONEY: result.MONEY,
+            BONUS: result.BONUS,
+            FULL_NAME: userName,
+            DISTCOUNT: money,
+            NOTE: note,
+            ID_PRODUCT_PROPERTIES: '',
+            MOBILE_RECEIVER: phoneText,
+            ID_CITY: city.MATP,
+            PAYMENT_TYPE: Numbercode,
+            ID_DISTRICT: district.MAQH,
+            ADDRESS: address,
+            ID_WARD: districChild.XAID,
+            IDSHOP: this.props.idshop.USER_CODE,
           })
-          .catch((error) => {
-            console.log(error);
-          });
-      }
-    );
+            .then((result) => {
+              console.log("this is orderProduct", result);
+              if (result.data.ERROR == "0000") {
+                this.setState(
+                  {
+                    loading: false,
+                    message: result.data.RESULT,
+                  },
+                  () => {
+                    this.props.removeAllToCart();
+                    return AlertCommon("Thông báo", `${result.data.RESULT}`, () => {
+                      navigation.navigate("Order"),
+                        navigation.popToTop();
+                    });
+                  }
+                );
+              } else {
+                this.setState(
+                  {
+                    loading: false,
+                    message: result.data.RESULT,
+                  },
+                  () => {
+                    return AlertCommon("Thông báo", `${result.data.RESULT}`, () =>
+                      this.props.navigation.navigate("home")
+                    );
+                  }
+                );
+              }
+            })
+            .catch((error) => {
+            });
+        }
+      );
+    }
+
   };
   checkError = () => {
     const {
@@ -246,68 +288,155 @@ class DetailAddressCart extends Component {
       note,
       showAlert,
       SUM,
+      value
     } = this.state;
-    if (
-      phoneText == "" ||
-      userName == "" ||
-      city == "" ||
-      district == "" ||
-      districChild == "" ||
-      address == ""
-    ) {
-      return false;
-    }
-    return true;
-  };
-  handleFeeShip = (item) => {
-    var feeShip = 0;
-    for (let i = 0; i < item.length; i++) {
-      feeShip += parseFloat(item[i].COST_SHIP);
-    }
-    return feeShip;
-  };
-  handleFeeSetUp = (item) => {
-    var feeSetUp = 0;
-    for (let i = 0; i < item.length; i++) {
-      feeSetUp += parseFloat(item[i].COST_SETUP);
-    }
-    return feeSetUp;
-  };
-  handleTotlaMoney = (item) => {
-    var sumMoney = 0;
-    if (this.state.checked) {
-      for (let i = 0; i < item.length; i++) {
-        sumMoney +=
-          parseFloat(item[i].COST_SHIP) + parseFloat(item[i].COST_SETUP);
-      }
+    if (value) {
+      return true;
     } else {
-      for (let i = 0; i < item.length; i++) {
-        sumMoney += parseFloat(item[i].COST_SHIP);
+      if (
+        phoneText == "" ||
+        userName == "" ||
+        city == "" ||
+        district == "" ||
+        address == ""
+      ) {
+        return false;
+      } else {
+        return true;
       }
     }
-    return numeral(parseFloat(this.state.SUM) + parseFloat(sumMoney)).format(
+
+  };
+  shipCode = () => {
+    this.setState({
+      city: '',
+      district: '',
+      districChild: '',
+      address: '',
+    })
+  }
+  handleTotlaMoney = (item) => {
+    console.log("ádfsdf", item)
+    var sumMoney = 0;
+    // if (this.state.checked) {
+    //   for (let i = 0; i < item.length; i++) {
+    //     sumMoney +=
+    //       parseFloat(item[i].COST_SHIP) + parseFloat(item[i].COST_SETUP);
+    //   }
+    // } else {
+    //   for (let i = 0; i < item.length; i++) {
+    //     sumMoney += parseFloat(item[i].COST_SHIP);
+    //   }
+    // }
+    return numeral(this.state.SUM).format(
       "0,0"
     );
   };
+  roseMoney = (item) => {
+    var sumMoney = 0;
+    for (let i = 0; i < item.length; i++) {
+      sumMoney +=
+        parseFloat(item[i].HHMAX);
+    }
+
+    return numeral(sumMoney).format(
+      "0,0"
+    );
+  }
+  roseDetail = (item, a) => {
+    var sumMoney1 = 0;
+    var sumMoney2 = 0;
+    if (a == 1) {
+      for (let i = 0; i < item.length; i++) {
+        sumMoney1 +=
+          parseFloat(item[i].PRICE) * 0.01 * parseFloat(item[i].COMISSION_PRODUCT);
+      }
+
+      return numeral(sumMoney1).format(
+        "0,0"
+      );
+    } else {
+      for (let i = 0; i < item.length; i++) {
+        sumMoney2 +=
+          parseFloat(item[i].PRICE) * 0.01 * parseFloat(item[i].COMISSION);
+      }
+
+      return numeral(sumMoney2).format(
+        "0,0"
+      );
+    }
+    // return sumMoney1 + sumMoney2;
+  }
   render() {
     const {
       phoneText,
       userName,
       city,
       district,
-      districChild,
       address,
-      note,
-      showAlert,
       SUM,
+      districChild,
+      value,
+      shipcode,
+      Numbercode,
+      money,
+      modalVisible
     } = this.state;
     const { listItem } = this.props;
-    const { item } = this.props.route.params;
-    console.log("item", item);
-    console.log("93939393", listItem, item);
-    //console.log(districChild, city, district, "20202020", this.props);
     return (
       <Provider>
+        <View>
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={modalVisible}
+          >
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <View style={{ flexDirection: 'column', justifyContent: 'space-evenly', alignItems: 'center' }}>
+                  <View style={{ width: sizeWidth(90), height: sizeHeight(7), backgroundColor: '#E1AC06', justifyContent: 'space-between', alignItems: 'center', flexDirection: 'row', padding: 10 }}>
+                    <View></View>
+                    <Text style={{ color: '#fff' }}>Chi tiết hoa hồng</Text>
+                    <TouchableOpacity
+
+                      onPress={() => {
+                        this.setState({ modalVisible: !this.state.modalVisible });
+                      }}
+                    >
+                      <Image
+                        source={require('../../../assets/images/daux.png')}
+                        style={{ width: 25, height: 25 }}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                  <View style={{ margin: 10 }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: sizeWidth(80), margin: 5 }}>
+                      <Text style={{ color: '#000' }}>Hoa hồng theo giá trị đơn hàng</Text>
+                      <Text>{this.roseDetail(listItem, 1)} đ</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: sizeWidth(80), margin: 5 }}>
+                      <Text style={{ color: '#000' }}>Hoa hồng theo mặt hàng</Text>
+                      <Text>{this.roseDetail(listItem, 2)} đ</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: sizeWidth(80), margin: 5 }}>
+                      <Text style={{ color: '#000' }}>Hoa hồng theo cộng tác viên</Text>
+                      <Text>{this.roseDetail(listItem, 2)} đ</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: sizeWidth(80), margin: 5 }}>
+                      <Text style={{ color: '#000' }}>Hoa hồng CTV giới thiệu</Text>
+                      <Text>{this.roseDetail(listItem, 2)} đ</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: sizeWidth(80), margin: 5, height: 1, backgroundColor: 'gray' }}></View>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: sizeWidth(80), margin: 5 }}>
+                      <Text style={{ color: '#000' }}>Hoa hồng tổng</Text>
+                      <Text>{this.roseDetail(listItem, 2)} đ</Text>
+                    </View>
+                  </View>
+                </View>
+              </View>
+            </View>
+          </Modal>
+        </View>
         <ScrollView
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={{
@@ -321,7 +450,7 @@ class DetailAddressCart extends Component {
           <View style={{ alignSelf: "center" }}>
             <FormTextInput
               props={{
-                placeholder: "Họ và tên *",
+                placeholder: "Họ và tên",
                 placeholderTextColor: "#Fafafa",
                 type: "name",
                 size: sizeFont(6),
@@ -343,7 +472,7 @@ class DetailAddressCart extends Component {
 
             <FormTextInput
               props={{
-                placeholder: "Số điện thoại *",
+                placeholder: "Điện thoại",
                 placeholderTextColor: "#999",
                 type: "phone",
                 size: sizeFont(6),
@@ -363,220 +492,196 @@ class DetailAddressCart extends Component {
               styleChild={styles.styleChild}
             />
 
-            <View style={{ alignSelf: "center", marginTop: sizeHeight(1) }}>
-              <FormTextInput
-                props={{
-                  placeholder: "Tỉnh/Thành phố *",
-                  placeholderTextColor: "#999",
-                  type: "email",
-                  size: sizeFont(8),
-                  name: "chevron-down",
-                  value: city.NAME == undefined ? "" : city.NAME,
-                  onChangeText: (text) => null,
-                  primary: "#017DFF",
-                  color: COLOR.BUTTON,
-                  onDelete: () => null,
-                  style: styles.styleWidth,
-                }}
-                eye={false}
-                onSetSee={this.onSetSee}
-                styleTextInput={{
-                  width: sizeWidth(76),
-                }}
-                styleChild={styles.styleChild}
-                pointerEvents="none"
-                onPressCustom={() => {
-                  this.props.navigation.navigate("ListCountries", {
-                    onSetCity: this.changeCity,
-                    NAME: "DetailAddressCart",
-                  });
-                }}
-                changeColor={COLOR.BUTTON}
-                light
-              />
-              <FormTextInput
-                props={{
-                  placeholder: "Quận/Huyện *",
-                  placeholderTextColor: "#999",
-                  type: "email",
-                  size: sizeFont(6),
-                  name: "chevron-down",
-                  value: district.NAME == undefined ? "" : district.NAME,
-                  onChangeText: (text) => null,
-                  primary: "#017DFF",
-                  color: COLOR.BUTTON,
-                  onDelete: () => null,
-                  style: styles.styleWidth,
-                }}
-                eye={false}
-                onSetSee={this.onSetSee}
-                styleTextInput={{
-                  width: sizeWidth(76),
-                }}
-                styleChild={styles.styleChild}
-                pointerEvents="none"
-                onPressCustom={() => {
-                  if (city == "") {
-                    this.message = "Vui lòng chọn Tỉnh/Thành phố";
-                    this.setState({ showAlert: true });
-                  } else {
-                    this.props.navigation.navigate("ListDistrict", {
-                      onSetDistrict: this.changeDistrict,
-                      GHN_TINHID: city.MATP,
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-evenly', margin: 10 }}>
+              <TouchableOpacity
+                style={{ flexDirection: 'row' }}
+                onPress={() => { this.setState({ value: true, city: '', district: '', districChild: '', address: '' }) }}
+              >
+                <View style={{ borderRadius: 50, width: 20, height: 20, borderColor: '#E1AC06', borderWidth: 1, justifyContent: 'center', alignItems: 'center' }}>
+                  <View style={{ backgroundColor: `${value ? '#E1AC06' : 'white'}`, borderRadius: 50, width: 12, height: 12 }}></View>
+                </View>
+                <Text style={{ marginLeft: 10 }}>Lấy hàng tại kho</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={{ flexDirection: 'row' }}
+                onPress={() => { this.setState({ value: false }) }}
+              >
+                <View style={{ borderRadius: 50, width: 20, height: 20, borderColor: '#E1AC06', borderWidth: 1, justifyContent: 'center', alignItems: 'center' }}>
+                  <View style={{ backgroundColor: `${value ? 'white' : '#E1AC06'}`, borderRadius: 50, width: 12, height: 12 }}></View>
+                </View>
+                <Text style={{ marginLeft: 10 }}>Giao hàng nhanh</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View>
+              {value ? null : <View style={{ alignSelf: "center", marginTop: sizeHeight(1) }}>
+                <FormTextInput
+                  props={{
+                    placeholder: "Tỉnh/Thành phố",
+                    placeholderTextColor: "#999",
+                    type: "email",
+                    size: sizeFont(8),
+                    name: "chevron-down",
+                    value: city.NAME == undefined ? "" : city.NAME,
+                    onChangeText: (text) => null,
+                    primary: "#017DFF",
+                    color: COLOR.BUTTON,
+                    onDelete: () => null,
+                    style: styles.styleWidth,
+                  }}
+                  eye={false}
+                  onSetSee={this.onSetSee}
+                  styleTextInput={{
+                    width: sizeWidth(76),
+                  }}
+                  styleChild={styles.styleChild}
+                  pointerEvents="none"
+                  onPressCustom={() => {
+                    this.props.navigation.navigate("ListCountries", {
+                      onSetCity: this.changeCity,
                       NAME: "DetailAddressCart",
                     });
-                  }
-                }}
-                changeColor={COLOR.BUTTON}
-                light
-              />
-              <FormTextInput
-                props={{
-                  placeholder: "Phường/Xã *",
-                  placeholderTextColor: "#999",
-                  type: "email",
-                  size: sizeFont(6),
-                  name: "chevron-down",
-                  value:
-                    districChild.NAME == undefined ? "" : districChild.NAME,
-                  onChangeText: (text) => null,
-                  primary: "#017DFF",
-                  color: COLOR.BUTTON,
-                  onDelete: () => null,
-                  style: styles.styleWidth,
-                }}
-                eye={false}
-                onSetSee={this.onSetSee}
-                styleTextInput={{
-                  width: sizeWidth(76),
-                }}
-                styleChild={styles.styleChild}
-                pointerEvents="none"
-                onPressCustom={() => {
-                  if (city == "") {
-                    this.setState({ showAlert: true });
-                  } else if (district == "") {
-                    this.message = "Vui lòng chọn Quận/Huyện";
-                    this.setState({ showAlert: true });
-                  } else {
-                    console.log("dis", district);
-                    this.props.navigation.navigate("ListDistrictChild", {
-                      onSetDistrictChild: this.changeDistrictChild,
-                      GHN_TINHID: district.MAQH,
-                      NAME: "DetailAddressCart",
-                    });
-                  }
-                }}
-                changeColor={COLOR.BUTTON}
-                light
-              />
-              <FormTextInput
-                props={{
-                  placeholder: "Địa chỉ giao hàng *",
-                  placeholderTextColor: "#999",
-                  type: "email",
-                  size: sizeFont(6),
-                  name: "times-circle",
-                  value: address,
-                  onChangeText: (text) => this.setState({ address: text }),
-                  primary: "#017DFF",
-                  color: COLOR.BUTTON,
-                  onDelete: () => this.setState({ address: "" }),
-                  style: styles.styleWidth,
-                }}
-                eye={false}
-                onSetSee={this.onSetSee}
-                styleTextInput={{
-                  width: sizeWidth(78),
-                }}
-                styleChild={styles.styleChild}
-              />
-            </View>
-            <View style={styles.viewNote}>
-              <Text>Ghi chú</Text>
-              <TextInput
-                //numberOfLines={5}
-                multiline={true}
-                value={note}
-                onChangeText={(text) => this.setState({ note: text })}
-              />
-            </View>
-            <View style={{ flexDirection: "row" }}>
-              <CheckBox
-                containerStyle={{
-                  backgroundColor: "#fff",
-                  borderWidth: 0,
-                  paddingHorizontal: sizeWidth(0),
-                }}
-                textStyle={{
-                  fontSize: sizeFont(4),
-                  fontWeight: "normal",
-                  color: "#000",
-                }}
-                title="Có lắp đặt"
-                checked={this.state.checked}
-                checkedIcon="dot-circle-o"
-                uncheckedIcon="circle-o"
-                checkedColor={COLOR.BUTTON}
-                size={sizeFont(8)}
-                uncheckedColor={COLOR.BUTTON}
-                onPress={() => this.setState({ checked: !this.state.checked })}
-              />
-              <CheckBox
-                containerStyle={{
-                  backgroundColor: "#fff",
-                  borderWidth: 0,
-                  flex: 1,
-                }}
-                textStyle={{
-                  fontSize: sizeFont(4),
-                  fontWeight: "normal",
-                  color: "#000",
-                }}
-                title="Không lắp đặt"
-                checked={!this.state.checked}
-                checkedIcon="dot-circle-o"
-                uncheckedIcon="circle-o"
-                uncheckedColor={COLOR.BUTTON}
-                checkedColor={COLOR.BUTTON}
-                size={sizeFont(8)}
-                onPress={() => this.setState({ checked: !this.state.checked })}
-              />
+                  }}
+                  changeColor={COLOR.BUTTON}
+                  light
+                />
+                <FormTextInput
+                  props={{
+                    placeholder: "Quận/Huyện",
+                    placeholderTextColor: "#999",
+                    type: "email",
+                    size: sizeFont(6),
+                    name: "chevron-down",
+                    value: district.NAME == undefined ? "" : district.NAME,
+                    onChangeText: (text) => null,
+                    primary: "#017DFF",
+                    color: COLOR.BUTTON,
+                    onDelete: () => null,
+                    style: styles.styleWidth,
+                  }}
+                  eye={false}
+                  onSetSee={this.onSetSee}
+                  styleTextInput={{
+                    width: sizeWidth(76),
+                  }}
+                  styleChild={styles.styleChild}
+                  pointerEvents="none"
+                  onPressCustom={() => {
+                    if (city == "") {
+                      this.message = "Vui lòng chọn Tỉnh/Thành phố";
+                      this.setState({ showAlert: true });
+                    } else {
+                      this.props.navigation.navigate("ListDistrict", {
+                        onSetDistrict: this.changeDistrict,
+                        GHN_TINHID: city.MATP,
+                        NAME: "DetailAddressCart",
+                      });
+                    }
+                  }}
+                  changeColor={COLOR.BUTTON}
+                  light
+                />
+                <FormTextInput
+                  props={{
+                    placeholder: "Phường/Xã *",
+                    placeholderTextColor: "#999",
+                    type: "email",
+                    size: sizeFont(6),
+                    name: "chevron-down",
+                    value:
+                      districChild.NAME == undefined ? "" : districChild.NAME,
+                    onChangeText: (text) => null,
+                    primary: "#017DFF",
+                    color: COLOR.BUTTON,
+                    onDelete: () => null,
+                    style: styles.styleWidth,
+                  }}
+                  eye={false}
+                  onSetSee={this.onSetSee}
+                  styleTextInput={{
+                    width: sizeWidth(76),
+                  }}
+                  styleChild={styles.styleChild}
+                  pointerEvents="none"
+                  onPressCustom={() => {
+                    if (city == "") {
+                      this.setState({ showAlert: true });
+                    } else if (district == "") {
+                      this.message = "Vui lòng chọn Quận/Huyện";
+                      this.setState({ showAlert: true });
+                    } else {
+                      console.log("dis", district);
+                      this.props.navigation.navigate("ListDistrictChild", {
+                        onSetDistrictChild: this.changeDistrictChild,
+                        GHN_TINHID: district.MAQH,
+                        NAME: "DetailAddressCart",
+                      });
+                    }
+                  }}
+                  changeColor={COLOR.BUTTON}
+                  light
+                />
+                <FormTextInput
+                  props={{
+                    placeholder: "Địa chỉ",
+                    placeholderTextColor: "#999",
+                    type: "email",
+                    size: sizeFont(6),
+                    name: "times-circle",
+                    value: address,
+                    onChangeText: (text) => this.setState({ address: text }),
+                    primary: "#017DFF",
+                    color: COLOR.BUTTON,
+                    onDelete: () => this.setState({ address: "" }),
+                    style: styles.styleWidth,
+                  }}
+                  eye={false}
+                  onSetSee={this.onSetSee}
+                  styleTextInput={{
+                    width: sizeWidth(78),
+                  }}
+                  styleChild={styles.styleChild}
+                />
+              </View>}
             </View>
           </View>
-
+          <View style={{ marginTop: 25 }}>
+            <View style={styles.infor}>
+              <Text style={styles.textInfor}>Giá trị hàng hóa</Text>
+            </View>
+          </View>
           <View
             style={{
               marginTop: sizeHeight(2),
-              borderTopWidth: 4,
-              borderTopColor: "#DDD",
             }}
           >
-            <View
-              style={[
-                styles.viewMoney,
-                {
-                  marginTop: sizeHeight(1),
-                },
-              ]}
-            >
-              <Text style={styles.textTitle}>Tiền hàng:</Text>
-              <Text style={styles.textMoney}>
-                {" "}
-                {numeral(SUM).format("0,0")}
-                VNĐ
+            <View style={styles.viewMoney}>
+              <Text style={styles.textTitle}>Đơn hàng:</Text>
+              <Text
+                style={[
+                  styles.textMoney,
+                  {
+                    fontWeight: "bold",
+                    color: COLOR.BUTTON,
+                  },
+                ]}
+              >
+                {this.handleTotlaMoney(listItem)} đ
               </Text>
             </View>
             <View style={styles.viewMoney}>
               <Text style={styles.textTitle}>Phí vận chuyển:</Text>
-              <Text style={styles.textMoney}>
-                {this.handleFeeShip(listItem)} VNĐ
-              </Text>
-            </View>
-            <View style={styles.viewMoney}>
-              <Text style={styles.textTitle}>Phí lắp đặt:</Text>
-              <Text style={styles.textMoney}>
-                {this.state.checked ? this.handleFeeSetUp(listItem) : 0} VNĐ
+              <Text
+                style={[
+                  styles.textMoney,
+                  {
+                    fontWeight: "bold",
+                    color: COLOR.BUTTON,
+                  },
+                ]}
+              >
+                {/* {this.roseMoney(listItem)} đ */}
+                0 đ
               </Text>
             </View>
             <View style={styles.viewMoney}>
@@ -590,11 +695,89 @@ class DetailAddressCart extends Component {
                   },
                 ]}
               >
-                {this.handleTotlaMoney(listItem)} VNĐ
+                {this.handleTotlaMoney(listItem)} đ
               </Text>
             </View>
+            {this.props.authUser.GROUPS == 8 ? null : <View style={styles.viewMoney}>
+              <Text style={styles.textTitle}>Hoa hồng tổng: <Text style={{ color: '#149CC6' }} onPress={() => { this.setState({ modalVisible: true }) }}>Chi tiết</Text></Text>
+              <Text
+                style={[
+                  styles.textMoney,
+                  {
+                    fontWeight: "bold",
+                    color: '#149CC6',
+                  },
+                ]}
+              >
+                {this.roseMoney(listItem)} đ
+              </Text>
+            </View>}
+            {this.props.authUser.GROUPS == 8 ? null : <View style={{ marginTop: 25 }}>
+              <View style={styles.infor}>
+                <Text style={styles.textInfor}>Thanh toán</Text>
+              </View>
+              <View style={{ marginTop: 10 }}>
+                <View style={{ alignItems: 'center' }}>
+                  <TextInput
+                    style={{ borderColor: '#DDD', borderWidth: 1, width: sizeWidth(90), paddingLeft: 10, height: sizeHeight(6) }}
+                    onChangeText={(text) => this.setState({ money: text })}
+                    placeholder="Số tiền muốn giảm giá"
+                  />
+                  <Text style={{ width: sizeWidth(90), fontStyle: 'italic', marginTop: 5, marginBottom: 5 }}>CTV có thể nhập giảm giá với số tiền không quá số hoa hồng tổng ({this.roseMoney(listItem)}đ) của chính đơn hàng</Text>
+                </View>
+                <View style={{ margin: sizeWidth(5), }}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <Text><Text style={{ fontWeight: 'bold' }}>Tổng tiền</Text> { }</Text>
+                    <Text style={{ color: COLOR.BUTTON, fontWeight: 'bold' }}>{this.endMoney()}</Text>
+                  </View>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <Text><Text style={{ fontWeight: 'bold' }}>Hoa hồng sau khi giảm trừ</Text> { }</Text>
+                    <Text style={{ color: "#149CC6", fontWeight: 'bold' }}>{this.endRose()}</Text>
+                  </View>
+                  <Text style={{ fontStyle: 'italic' }}>(Hoa hồng được cộng sau khi hoàn thành đơn hàng)</Text>
+                </View>
+              </View>
+            </View>}
+            <View
+              style={{
+                marginTop: sizeHeight(2),
+                borderTopWidth: 4,
+                borderTopColor: "#DDD",
 
-            <View style={{ alignSelf: "center", marginTop: sizeHeight(1) }}>
+              }}
+            >
+              <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                <Text>Hình thức thanh toán</Text>
+              </View>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-evenly', margin: 10 }}>
+                <TouchableOpacity
+                  style={{ flexDirection: 'row' }}
+                  onPress={() => { this.setState({ shipcode: true, Numbercode: 'COD' }) }}
+                >
+                  <View style={{ borderRadius: 50, width: 20, height: 20, borderColor: '#E1AC06', borderWidth: 1, justifyContent: 'center', alignItems: 'center' }}>
+                    <View style={{ backgroundColor: `${shipcode ? '#E1AC06' : 'white'}`, borderRadius: 50, width: 12, height: 12 }}></View>
+                  </View>
+                  <Text style={{ marginLeft: 10 }}>COD</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={{ flexDirection: 'row' }}
+                  onPress={() => { this.setState({ shipcode: false, Numbercode: 'CK' }) }}
+                >
+                  <View style={{ borderRadius: 50, width: 20, height: 20, borderColor: '#E1AC06', borderWidth: 1, justifyContent: 'center', alignItems: 'center' }}>
+                    <View style={{ backgroundColor: `${shipcode ? 'white' : '#E1AC06'}`, borderRadius: 50, width: 12, height: 12 }}></View>
+                  </View>
+                  <Text style={{ marginLeft: 10 }}>Chuyển khoản</Text>
+                </TouchableOpacity>
+              </View>
+              <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                <TextInput
+                  style={{ borderColor: '#DDD', borderWidth: 1, width: sizeWidth(90), height: sizeHeight(6), paddingLeft: 6 }}
+                  placeholder="Ghi chú cho shop"
+                  onChangeText={(text) => this.setState({ note: text })}
+                />
+              </View>
+            </View>
+            <View style={{ alignSelf: "center", marginTop: sizeHeight(8) }}>
               <TouchableOpacity
                 disabled={this.checkError() == false ? true : false}
                 style={[
@@ -612,6 +795,7 @@ class DetailAddressCart extends Component {
               </TouchableOpacity>
             </View>
           </View>
+
           {this.state.loading ? (
             <View style={{ alignSelf: "center" }}>
               <Loading />
@@ -628,6 +812,7 @@ const mapStateToProps = (state) => {
     authUser: state.authUser.authUser,
     username: state.authUser.username,
     listItem: state.order.listItem,
+    idshop: state.product.database,
   };
 };
 

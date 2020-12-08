@@ -7,6 +7,8 @@ export const TOKEN_KEY = "TOKEN_KEY";
 export const DEVICE_TYPE = "DEVICE_TYPE";
 export const OS_VERSION = "OS_VERSION";
 export const UUID = "UUID";
-export const ID_SHOP = "ID_SHOP";
 export const AUTH = "AUTH";
 export const USER_NAME = "USER_NAME";
+export const PASSWORD = "PASSWORD";
+export const IDSHOP="IDSHOP";
+

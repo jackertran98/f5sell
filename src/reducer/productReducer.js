@@ -3,6 +3,7 @@ import {
   BEST_PRODUCT,
   NEW_PRODUCT,
   POPULAR_PRODUCT,
+  ID_SHOP,
 } from "../action/types";
 
 const INIT_STATE = {
@@ -10,6 +11,7 @@ const INIT_STATE = {
   bestProduct: [],
   popularProduct: [],
   newProduct: [],
+  database:[],
 };
 
 export default (state = INIT_STATE, action) => {
@@ -31,6 +33,12 @@ export default (state = INIT_STATE, action) => {
         ...state,
         newProduct: [...action.payload],
       };
+    }
+    case ID_SHOP:{
+      console.log('1212121sss',action)
+      return {
+        database:action.payload
+      }
     }
     case POPULAR_PRODUCT: {
       return {

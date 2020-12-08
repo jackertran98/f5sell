@@ -36,15 +36,13 @@ class LevelCollaborator extends Component {
       I_PAGE: this.offset,
       NUMOFPAGE: 10,
       LEVEL: "",
-      IDSHOP: "BABU12",
+      IDSHOP: this.props.idshop.USER_CODE,
     })
       .then((result) => {})
       .catch((error) => {
-        console.log(error);
       });
-    getCollorator({ IDSHOP: "BABU12" })
+    getCollorator({ IDSHOP: this.props.idshop.USER_CODE })
       .then((result) => {
-        console.log("list", result);
         if (result.data.ERROR == "0000") {
           this.setState(
             {
@@ -57,7 +55,6 @@ class LevelCollaborator extends Component {
         }
       })
       .catch((err) => {
-        console.log(err);
         this.setState({ loading: false });
       });
   }
@@ -121,6 +118,7 @@ const mapStateToProps = (state) => {
     status: state.authUser.status,
     authUser: state.authUser.authUser,
     username: state.authUser.username,
+    idshop: state.product.database,
   };
 };
 

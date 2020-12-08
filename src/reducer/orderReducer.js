@@ -41,7 +41,7 @@ export default (state = INIT_STATE, action) => {
       return {
         ...state,
         listItem: state.listItem.filter(
-          (element, index) => element.CODE_PRODUCT != action.payload
+          (element, index) => element.CODE_PRODUCT != action.payload.CODE_PRODUCT
         ),
       };
     }

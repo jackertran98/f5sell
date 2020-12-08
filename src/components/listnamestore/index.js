@@ -29,7 +29,7 @@ export default class ListNameStore extends Component {
   }
   handleLevelCTV = () => {
     GetListStore({
-      IDSHOP: "BABU12",
+      IDSHOP: "ABC123",
       USERNAME: "babu",
       INDEXPAGE: this.offset,
       NUMOFPAGE: 20,
@@ -45,30 +45,21 @@ export default class ListNameStore extends Component {
       })
       .catch((error) => {
         this.setState({ loadingSlow: false });
-        console.log(error);
       });
   };
   componentDidMount() {
     this.handleLevelCTV();
   }
   onMomentumScrollBegin = () => {
-    console.log("Hello");
     this.onEndReachedCalledDuringMomentum = false;
-    console.log(this.onEndReachedCalledDuringMomentum);
   };
   onEndReached = ({ distanceFromEnd }) => {
     const { listStore } = this.state;
-    console.log(
-      "offset tone",
-      this.offset,
-      this.onEndReachedCalledDuringMomentum
-    );
     if (!this.onEndReachedCalledDuringMomentum) {
-      console.log("offset", this.offset, this.onEndReachedCalledDuringMomentum);
       this.offset = this.offset + 1;
       this.setState({ loadingMore: true }, () => {
         GetListStore({
-          IDSHOP: "BABU12",
+          IDSHOP: "ABC123",
           USERNAME: "babu",
           INDEXPAGE: this.offset,
           NUMOFPAGE: 20,
@@ -85,7 +76,6 @@ export default class ListNameStore extends Component {
           })
           .catch((error) => {
             this.setState({ loadingMore: false });
-            console.log(error);
           });
       });
       this.onEndReachedCalledDuringMomentum = true;

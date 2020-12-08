@@ -7,9 +7,10 @@ import {
   TouchableOpacity,
   Platform,
   Alert,
+  Keyboard,
+  TextInput,
 } from "react-native";
-import LogoApp from "../../logo";
-import ComponentTextInput from "../../../../components/textinput";
+import { ComponentSign } from "../../../../components/textinput";
 import {
   sizeFont,
   sizeHeight,
@@ -21,86 +22,126 @@ import { checkPassword } from "../../../../utils/helper/password_validator";
 import { AlertCommon } from "../../../../components/error";
 import { regUser } from "../../../../service/auth";
 import { result } from "lodash";
-
+import IconComponets from "../../../../components/icon";
+import {
+  checkFullName,
+  isVietnamesePhoneNumber,
+  alphanumeric,
+} from "../../../../utils/check";
 export default class SignUp extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      nameText: "",
       phoneText: "",
       passwordText: "",
-      nameText: "",
-      confirmPassword: "",
+      emailText: "",
+      cityText: "",
+      districtText: "",
+      addressText: "",
+      idShop: "",
+      codeinfo: "",
+      confirmPassword: ""
     };
+
   }
   onBack = () => {
     this.props.navigation.popToTop();
-    this.props.navigation.navigate("Home");
+    this.props.navigation.navigate("home");
   };
   handleReg = () => {
-    const { phoneText, passwordText, confirmPassword, nameText } = this.state;
+    const { phoneText, passwordText, emailText, cityText, districtText, addressText, confirmPassword, nameText } = this.state;
     const password = checkPassword(passwordText);
-    console.log(password);
-    if (nameText == "") {
-      AlertCommon("Thông báo", "Vui lòng nhập họ và tên", () => null);
-    } else if (phoneText == "") {
-      AlertCommon("Thông báo", "Vui lòng nhập số điện thoại", () => null);
-    } else if (password.length != 0) {
+    var checkEmail = /[A-Z0-9._%+-]+@[A-Z0-9-]+.+.[A-Z]{2,4}/igm;
+    Keyboard.dismiss();
+    if (
+      nameText.trim() == "" ||
+      !checkFullName(nameText) ||
+      nameText.length > 50
+    ) {
+      AlertCommon(
+        "Thông báo",
+        "Vui lòng nhập họ và tên chỉ gồm chữ và số và nhỏ hơn 50 kí tự",
+        () => null
+      );
+    } else if (phoneText.trim() == "" || !isVietnamesePhoneNumber(phoneText)) {
+      AlertCommon(
+        "Thông báo",
+        "Vui lòng nhập số điện thoại và chỉ gồm 10 chữ số",
+        () => null
+      );
+    } else if (!checkEmail.test(emailText)) {
+      AlertCommon(
+        "Thông báo",
+        "Email không đúng định dạng",
+        () => null
+      );
+    }else if (districtText=="") {
+      AlertCommon(
+        "Thông báo",
+        "Không để trống địa chỉ",
+        () => null
+      );
+    }else if (districtText.length>100) {
+      AlertCommon(
+        "Thông báo",
+        "Không nhập quá 100 ký tự",
+        () => null
+      );
+    }else if (password.length != 0 || alphanumeric(passwordText)) {
       AlertCommon(
         "Mật khẩu yếu",
-        "Mật khẩu phải có độ dài lớn hơn 8, bao gồm chữ hoa, chữ thừơng, số và ký tự đặc biệt",
+        "Mật khẩu phải có độ dài lớn hơn 8, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt",
         () => null
       );
     } else {
       if (confirmPassword !== passwordText) {
-        AlertCommon(
-          "Thống báo",
-          "Xác thực mật khẩu không chính xác",
-          () => null
+        AlertCommon("Thống báo", "Xác thực mật khẩu không chính xác", () => null
         );
       } else {
         regUser({
           FULL_NAME: nameText,
           MOBILE: phoneText,
-          EMAIL: "",
+          EMAIL: emailText,
           ID_CITY: "",
           ID_DISTRICT: "",
-          ADDRESS: "",
+          ADDRESS: districtText,
           PASSWORD: passwordText,
-          IDSHOP: "BABU12",
+          IDSHOP: "ABC123",
         })
           .then((result) => {
-            console.log("reg", result.data);
             if (result.data.ERROR == "0000") {
-              return AlertCommon("Thông báo", result.data.RESULT, this.onBack);
+              return AlertCommon("Thông báo", result.data.RESULT, ()=>{this.props.navigation.navigate("SignIn")});
             } else {
               return AlertCommon("Thông báo", result.data.RESULT, () => null);
             }
-          })  
+          })
           .catch((err) => {
-            console.log(err);
           });
+
       }
     }
   };
   render() {
-    const { phoneText, passwordText, nameText, confirmPassword } = this.state;
+    const { phoneText, passwordText, codeinfo, confirmPassword, emailText, cityText, districtText, addressText, idShop, nameText } = this.state;
     return (
       <ScrollView
         contentContainerStyle={styles.conatainer}
         keyboardShouldPersistTaps="handled"
       >
-        {/** <StatusBar barStyle="dark-content" backgroundColor="#FFF" translucent /> */}
-        <View style={styles.logo}>
-          <LogoApp />
+        <View style={styles.logoSignup}>
+          <View style={styles.iconSignup}><IconComponets name="user" size={sizeFont(15)} color="#E1AC06" /></View>
+          <View style={styles.viewSignup}>
+            <Text style={{ fontSize: 30, textAlign: 'center' }}>CREATE <Text style={{ fontWeight: 'bold' }}>ACCOUT</Text></Text>
+          </View>
+          <Text style={{ backgroundColor: '#222220', width: 150, height: 5, marginTop: 8, borderRadius: 100 }}></Text>
         </View>
         <View>
-          <ComponentTextInput
+          <ComponentSign
             placeholder="Họ và tên *"
             placeholderTextColor="#999"
             type="name"
             size={sizeFont(6)}
-            nameIcon={"user-circle"}
-            name={"times-circle"}
             value={nameText}
             onChangeText={(text) => this.setState({ nameText: text })}
             // primary={"#017DFF"}
@@ -108,13 +149,11 @@ export default class SignUp extends Component {
             color={COLOR.COLOR_ICON}
             onDelete={() => this.setState({ nameText: "" })}
           />
-          <ComponentTextInput
+          <ComponentSign
             placeholder="Số điện thoại của bạn *"
             placeholderTextColor="#999"
             type="phone"
             size={sizeFont(6)}
-            nameIcon={"phone"}
-            name={"times-circle"}
             value={phoneText}
             onChangeText={(text) => this.setState({ phoneText: text })}
             // primary={"#017DFF"}
@@ -122,13 +161,72 @@ export default class SignUp extends Component {
             color={COLOR.COLOR_ICON}
             onDelete={() => this.setState({ phoneText: "" })}
           />
-          <ComponentTextInput
-            placeholder="Mật khẩu *"
+          <ComponentSign
+            placeholder="Mã giới thiệu *"
+            placeholderTextColor="#999"
+            type="name"
+            size={sizeFont(6)}
+            value={codeinfo}
+            onChangeText={(text) => this.setState({ codeinfo: text })}
+            // primary={"#017DFF"}
+            primary={"#fff"}
+            color={COLOR.COLOR_ICON}
+            onDelete={() => this.setState({ codeinfo: "" })}
+          />
+          <ComponentSign
+            placeholder="Email"
+            placeholderTextColor="#999"
+            type="phone"
+            size={sizeFont(6)}
+            value={emailText}
+            onChangeText={(text) => this.setState({ emailText: text })}
+            // primary={"#017DFF"}
+            primary={"#fff"}
+            color={COLOR.COLOR_ICON}
+            onDelete={() => this.setState({ phoneText: "" })}
+          />
+          <ComponentSign
+            placeholder="Tỉnh/thành phố *"
+            placeholderTextColor="#999"
+            type="phone"
+            size={sizeFont(6)}
+            value={cityText}
+            onChangeText={(text) => this.setState({ cityText: text })}
+            // primary={"#017DFF"}
+            primary={"#fff"}
+            color={COLOR.COLOR_ICON}
+            onDelete={() => this.setState({ phoneText: "" })}
+          />
+          <ComponentSign
+            placeholder="Quận/huyện *"
+            placeholderTextColor="#999"
+            type="phone"
+            size={sizeFont(6)}
+            value={districtText}
+            onChangeText={(text) => this.setState({ districtText: text })}
+            // primary={"#017DFF"}
+            primary={"#fff"}
+            color={COLOR.COLOR_ICON}
+            onDelete={() => this.setState({ phoneText: "" })}
+          />
+
+          <ComponentSign
+            placeholder="Địa chỉ *"
+            placeholderTextColor="#999"
+            type="name"
+            size={sizeFont(6)}
+            value={addressText}
+            onChangeText={(text) => this.setState({ addressText: text })}
+            // primary={"#017DFF"}
+            primary={"#fff"}
+            color={COLOR.COLOR_ICON}
+            onDelete={() => this.setState({ phoneText: "" })}
+          />
+          <ComponentSign
+            placeholder="Mật khẩu (dài hơn 6 ký tự) *"
             placeholderTextColor="#999"
             type="password"
             size={sizeFont(6)}
-            nameIcon={"lock"}
-            name={"times-circle"}
             value={passwordText}
             onChangeText={(text) => this.setState({ passwordText: text })}
             // primary={"#017DFF"}
@@ -136,13 +234,11 @@ export default class SignUp extends Component {
             color={COLOR.COLOR_ICON}
             onDelete={() => this.setState({ passwordText: "" })}
           />
-          <ComponentTextInput
-            placeholder="Xác nhận mật khẩu *"
+          <ComponentSign
+            placeholder="Xác nhận mật khẩu"
             placeholderTextColor="#999"
             type="password"
             size={sizeFont(6)}
-            nameIcon={"lock"}
-            name={"times-circle"}
             value={confirmPassword}
             onChangeText={(text) => this.setState({ confirmPassword: text })}
             // primary={"#017DFF"}
@@ -150,6 +246,17 @@ export default class SignUp extends Component {
             color={COLOR.COLOR_ICON}
             onDelete={() => this.setState({ confirmPassword: "" })}
           />
+          {/* <ComponentSign
+            placeholder="Id Shop"
+            placeholderTextColor="#999"
+            type="shop"
+            size={sizeFont(6)}
+            value={idShop}
+            onChangeText={(text) => this.setState({ idShop: text })}
+            primary={"#fff"}
+            color={COLOR.COLOR_ICON}
+            onDelete={() => this.setState({ idShop: "" })}
+          /> */}
         </View>
         <View style={styles.viewFooter}>
           <TouchableOpacity style={styles.touchSignUp} onPress={this.handleReg}>

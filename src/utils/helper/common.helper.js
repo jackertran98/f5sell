@@ -12,30 +12,11 @@ function strToAlphaBet(str) {
   // str = str.replace(/\u02C6|\u0306|\u031B/g, ""); // Â, Ê, Ă, Ơ, Ư
   return str;
 }
-
-// export const showPrice = async price => {
-//   console.log('State: ', store.getState());
-// };
 export const getDeviceToken = () => {
   return new Promise((resolve, reject) => {
-    //   firebase
-    //     .messaging()
-    //     .hasPermission()
-    //     .then(enabled => {
-    //       if (enabled) {
-    //         firebase
-    //           .messaging()
-    //           .getToken()
-    //           .then(token => {
-    //             resolve(token);
-    //           });
-    //       } else {
-    //         reject(null);
-    //       }
-    //     });
+   
     Onesignal.getPermissionSubscriptionState((status) => {
       let userId = status.userId;
-      // alert(userId);
       resolve(userId);
     });
   });

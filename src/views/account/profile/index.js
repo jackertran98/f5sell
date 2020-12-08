@@ -12,7 +12,6 @@ import Information from "./infor";
 import Contact from "./contact";
 import { COLOR } from "../../../utils/color/colors";
 import { sizeHeight, sizeWidth } from "../../../utils/helper/size.helper";
-import AlertOption from "../../../components/alert/AlertOption";
 import { Provider } from "react-native-paper";
 import { _removeData } from "../../../utils/asynStorage";
 import { TOKEN } from "../../../utils/asynStorage/store";
@@ -34,7 +33,6 @@ class Profile extends Component {
       [
         {
           text: "Cancel",
-          onPress: () => console.log("Cancel Pressed"),
           style: "destructive",
         },
         {

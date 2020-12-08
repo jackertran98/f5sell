@@ -4,6 +4,7 @@ import {
   sizeFont,
 } from "../../../utils/helper/size.helper";
 import { COLOR } from "../../../utils/color/colors";
+import { Left } from "native-base";
 
 const { StyleSheet } = require("react-native");
 
@@ -39,7 +40,9 @@ const styles = StyleSheet.create({
     // borderWidth: 0.5,
     marginVertical: sizeHeight(1),
     // marginHorizontal: sizeWidth(2),
-    width: sizeWidth(31),
+    width: sizeWidth(38),
+    borderColor:COLOR.COLOR_BOTTOM,
+    borderWidth:1.5,
     //width: sizeWidth(30),
     overflow: "hidden",
     marginRight: sizeWidth(2),
@@ -49,7 +52,12 @@ const styles = StyleSheet.create({
     // width: sizeWidth(30),
     height: "100%",
     //height: sizeHeight(20),
-    overflow: "visible",
+    overflow:"visible",
+  },
+  imageSize1: {
+    
+    width: sizeWidth(30),
+    height: sizeHeight(20),
   },
   textName: {
     fontSize: sizeFont(3.5),
@@ -114,6 +122,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+    borderRadius:50,
   },
   viewContainer: {
     flexDirection: "row",
@@ -137,5 +146,52 @@ const styles = StyleSheet.create({
     fontSize: sizeFont(3.5),
     marginTop: sizeHeight(1.5),
   },
+  
+
+
+
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: "#E1AC06",
+    borderRadius: 10,
+    width:sizeWidth(90),
+    height:sizeHeight(20),
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 1,
+    shadowRadius: 3.84,
+    elevation: 5
+  },
+  textStyle: {
+    color: "black",
+    fontWeight: "bold",
+    textAlign: "center"
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: "center"
+  },
+  openButton:{
+    position:'absolute',
+    right:-5,
+    top:-5,
+    width:sizeWidth(7),
+    height:sizeHeight(3.5),
+    backgroundColor:'white',
+    borderWidth:1,
+    borderColor:'black',
+    borderRadius:50,
+    justifyContent:'center',
+    alignItems:'center',
+  }
 });
 export default styles;

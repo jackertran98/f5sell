@@ -25,7 +25,6 @@ export default class ListDistrictChild extends Component {
     const { GHN_TINHID } = this.props.route.params;
     await GetDistrictChild({ ID_DISTRICT: GHN_TINHID })
       .then((result) => {
-        console.log(result.data, "district child");
         if (result.data.ERROR == "0000") {
           this.setState(
             {
@@ -41,7 +40,6 @@ export default class ListDistrictChild extends Component {
       })
       .catch((error) => {
         this.setState({ loading: false });
-        console.log(error);
       });
 
     // for (let i = 0; i < this.state.data.length; i++) {

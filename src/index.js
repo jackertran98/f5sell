@@ -5,21 +5,19 @@ import { Provider, connect } from "react-redux";
 import "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Root } from "native-base";
-import { configureStore } from "./store";
+import { store, persistor } from "./store";
 import { NavigationContainer } from "@react-navigation/native";
 import { YellowBox } from "react-native";
 import { _retrieveData } from "./utils/asynStorage";
 import { MenuProvider } from "react-native-popup-menu";
-import codePush from "react-native-code-push";
+// import codePush from "react-native-code-push";
 import ProgressCircle from "react-native-progress-circle";
 import SplashScreen from "react-native-splash-screen";
 import { sizeWidth, sizeHeight, sizeFont } from "./utils/helper/size.helper";
 import { COLOR } from "./utils/color/colors";
 import { Platform } from "react-native";
 var totalPercen = 0;
-YellowBox.ignoreWarnings([
-  "Animated: `useNativeDriver` was not specified. This is a required option and must be explicitly set to `true` or `false`",
-]);
+
 
 export default class App extends Component {
   constructor(props) {
@@ -72,62 +70,45 @@ export default class App extends Component {
         this.setState({ loading: false });
       }, 2500);
     }
-    if (downloadProgress) {
-      console.log(downloadProgress);
-      console.log(
-        "Downloading " +
-          downloadProgress.receivedBytes +
-          " of " +
-          downloadProgress
-      );
-    }
+    
     //this.setState({loading: false});
   };
   componentDidMount() {
     //  if (Platform.OS === "android") {
     SplashScreen.hide();
     // }
-  }
+  //   codePush.sync({
+  //     updateDialog: true,
+  //     installMode: codePush.InstallMode.IMMEDIATE
+  // })
+  
+}
   onError = (error) => {
     console.log("An error occurred. " + error);
   };
-  async UNSAFE_componentWillMount() {
-    var updateDialogOptions = {
-      updateTitle: "You have an update",
-      optionalUpdateMessage: "Update available. Install?",
-      //optionalIgnoreButtonLabel: "Nop",
-      optionalInstallButtonLabel: "Install",
-    };
-    this.setState({ loading: true });
-    codePush.sync(
-      { installMode: codePush.InstallMode.IMMEDIATE },
-      this.onSyncStatusChange,
-      this.onDownloadProgress,
-      this.onError
-    );
-    // codePush.checkForUpdate().then(update => {
-    //   if (!update) {
-    //     console.log('The app is up to date!');
-    //   } else {
-    //     console.log('An update is available! Should we download it?');
-    //   }
-    // });
-    //if (Platform.OS == 'android') {
-    // SplashScreen.hide();
-    //}
-    // setTimeout(() => {
-    //   this.setState({timeout: 2});
-    // }, 2000);
-    //codePush.allowRestart();
+  // async UNSAFE_componentWillMount() {
+  //   var updateDialogOptions = {
+  //     updateTitle: "You have an update",
+  //     optionalUpdateMessage: "Update available. Install?",
+  //     //optionalIgnoreButtonLabel: "Nop",
+  //     optionalInstallButtonLabel: "Install",
+  //   };
+  //   this.setState({ loading: true });
+  //   codePush.sync(
+  //     { installMode: codePush.InstallMode.IMMEDIATE },
+  //     this.onSyncStatusChange,
+  //     this.onDownloadProgress,
+  //     this.onError
+  //   );
 
-    this.setState({ loading: false }, () => {});
+  //   this.setState({ loading: false }, () => {});
 
-    codePush.allowRestart();
-    //SplashScreen.show();
-  }
-  componentWillUnmount() {
-    clearTimeout(this.time);
-  }
+  //   codePush.allowRestart();
+  //   //SplashScreen.show();
+  // }
+  // componentWillUnmount() {
+  //   clearTimeout(this.time);
+  // }
   render() {
     return this.state.loading == true ? (
       <View
@@ -155,7 +136,7 @@ export default class App extends Component {
             marginBottom: sizeHeight(1),
           }}
         >
-          Cập nhật phiên bản mới Babu Mart!{" "}
+          Cập nhật phiên bản mới !{" "}
         </Text>
 
         <ProgressCircle
@@ -174,13 +155,13 @@ export default class App extends Component {
       </View>
     ) : (
       <Root>
-        <MenuProvider>
           <SafeAreaProvider>
-            <Provider store={configureStore({})}>
-              <AppNavigation />
+            <Provider store={store}>
+            
+                  <AppNavigation />
+                  
             </Provider>
           </SafeAreaProvider>
-        </MenuProvider>
       </Root>
     );
   }

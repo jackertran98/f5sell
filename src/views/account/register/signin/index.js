@@ -14,7 +14,6 @@ import {
   sizeHeight,
   sizeWidth,
 } from "../../../../utils/helper/size.helper";
-import IconComponets from "../../../../components/icon";
 import { COLOR } from "../../../../utils/color/colors";
 import ComponentTextInput from "../../../../components/textinput";
 import { connect } from "react-redux";
@@ -53,7 +52,6 @@ class SignIn extends Component {
   };
   render() {
     const { phoneText, password, loading } = this.state;
-    console.log(this.props);
     return (
       <ScrollView
         keyboardShouldPersistTaps="handled"
@@ -63,7 +61,7 @@ class SignIn extends Component {
           //height: "100%",
         }}
       >
-        <View style={{}}>
+        <View style={{ height: sizeHeight(86) }}>
           <View style={{}}>
             <LogoApp />
           </View>
@@ -88,11 +86,10 @@ class SignIn extends Component {
               placeholderTextColor="#999"
               type="password"
               size={sizeFont(6)}
-              nameIcon={"lock-alt"}
+              nameIcon={"lock-alt"} color="red"
               onChangeText={(text) => this.setState({ password: text })}
               // primary={"#017DFF"}
               primary={"#fff"}
-              name={"times-circle"}
               color={COLOR.COLOR_ICON}
               value={password}
               onDelete={() => this.setState({ password: "" })}
@@ -103,33 +100,36 @@ class SignIn extends Component {
             <TouchableOpacity
               onPress={() => {
                 this.setState({ loading: true }, async () => {
-                  console.log("Hello", phoneText, password);
-                  await this.props
-                    .LoginPhone({
-                      IDSHOP: "BABU12",
-                      USERNAME: phoneText,
-                      PASSWORD: password,
-                    })
-                    .then((res) => {
-                      console.log("res", res);
-                      if (res.data.ERROR == "0000") {
-                        this.props.navigation.popToTop();
-                        this.props.navigation.navigate("Home");
-                      } else {
-                        this.showToast(res);
-                      }
-                    })
-                    .catch((err) => {
-                      console.log(err);
-                    });
+                  if (phoneText == " " && phoneText == "") {
+                    AlertCommon("Thông báo", "Vui lòng nhập số điện thoại", () => null);
+                  } else if (password == "") {
+                    AlertCommon("Thông báo", "Vui lòng nhập mật khẩu", () => null);
+                  } else {
+                    await this.props
+                      .LoginPhone({
+                        IDSHOP: this.props.idshop.USER_CODE,
+                        USERNAME: phoneText,
+                        PASSWORD: password,
+                      })
+                      .then((res) => {
+                        if (res.data.ERROR == "0000") {
+                          this.props.navigation.popToTop();
+                          this.props.navigation.navigate("screenHome");
+                        } else {
+                          AlertCommon("Thông báo", "Tên đăng nhập hoặc mật khẩu không đúng", () => null);
+                        }
+                      })
+                      .catch((err) => {
+                      });
+                  }
                   this.setState({ loading: false });
                 });
               }}
               style={{
-                backgroundColor: COLOR.BUTTON,
+                backgroundColor: COLOR.BUTTON_SIGN_IN,
                 paddingVertical: sizeHeight(1.5),
-                borderRadius: 6,
-                width: sizeWidth(85),
+                borderRadius: 100,
+                width: sizeWidth(65),
                 alignSelf: "center",
               }}
             >
@@ -151,7 +151,7 @@ class SignIn extends Component {
               onPress={() =>
                 AlertCommon(
                   "Thông báo",
-                  "Vui lòng liên hệ với BaBu để được cấp lại mật khẩu mới",
+                  "Vui lòng liên hệ với f5sell để được cấp lại mật khẩu mới",
                   () => null
                 )
               }
@@ -177,6 +177,7 @@ const mapStateToProps = (state) => {
   return {
     status: state.authUser.status,
     authUser: state.authUser.authUser,
+    idshop: state.product.database,
   };
 };
 
@@ -187,4 +188,3 @@ export default connect(
   mapStateToProps,
   mapDispatchToProps
 )(SignIn);
-//export default SignIn;

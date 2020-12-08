@@ -25,11 +25,10 @@ export default class ListStores extends Component {
   }
   componentDidMount() {
     const { item, authUser } = this.props.route.params;
-    console.log("order code", item);
     listStores({
       USERNAME: authUser.USERNAME,
       CODE_ORDER: item.CODE_ORDER,
-      IDSHOP: "BABU12",
+      IDSHOP: "ABC123",
     })
       .then((result) => {
         if (result.data.ERROR === "0000") {
@@ -37,12 +36,10 @@ export default class ListStores extends Component {
             this.setState({ loading: false })
           );
         }
-        console.log(result);
         this.setState({ loading: false });
       })
       .catch((error) => {
         this.setState({ loading: false });
-        console.log(error);
       });
   }
   handleMoney = (item) => {
@@ -70,7 +67,6 @@ export default class ListStores extends Component {
   render() {
     const { loading, data } = this.state;
     const { item, authUser } = this.props.route.params;
-    console.log("oooo", this.props.route.params);
     return loading ? (
       <Spinner
         visible={loading}

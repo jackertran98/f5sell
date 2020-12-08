@@ -27,13 +27,13 @@ export default class CalendarComponent extends Component {
                 }}
                 // Handler which gets executed on day long press. Default = undefined
                 onDayLongPress={(day) => {
-                  console.log("selected day", day);
+
                 }}
                 // Month format in calendar title. Formatting values: http://arshaw.com/xdate/#Formatting
                 monthFormat={"MMMM yyyy"}
                 // Handler which gets executed when visible month changes in calendar. Default = undefined
                 onMonthChange={(month) => {
-                  console.log("month changed", month);
+
                 }}
                 theme={{
                   textSectionTitleColor: "#000",

@@ -1,72 +1,107 @@
+
+
+
+
+
 import React, { Component } from "react";
-import PropTypes from "prop-types";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { View, Text, FlatList, StyleSheet, TouchableOpacity,ScrollView } from "react-native";
+import { GetInformation } from "../../../../../service/account";
+import { connect } from "react-redux";
+import { ElementCustom } from "../../../../../components/error";
+import Spinner from "react-native-loading-spinner-overlay";
+import HTML from "react-native-render-html";
 import IconComponets from "../../../../../components/icon";
 import {
   sizeFont,
-  sizeWidth,
   sizeHeight,
+  sizeWidth,
 } from "../../../../../utils/helper/size.helper";
-import moment from "moment";
-export default class DetailPolicy extends Component {
+import _ from "lodash";
+class Tranning extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      data: [],
+      loading: true,
+    };
+  }
   componentDidMount() {
-    const { navigation, route } = this.props;
-    navigation.setParams({
-      NAVIGATION: () => {
-        navigation.navigate("EditPolicy", {
-          item: route.params.item,
-        });
-      },
-    });
+    const { authUser } = this.props;
+    GetInformation({
+      USERNAME: authUser.USERNAME,
+      TYPES: 2,
+      IDSHOP: this.props.idshop.USER_CODE,
+    })
+      .then((result) => {
+        if (result.data.ERROR === "0000") {
+          this.setState(
+            {
+              data: result.data.INFO,
+            },
+            () => this.setState({ loading: false })
+          );
+        } else {
+          this.setState({ loading: false });
+        }
+      })
+      .catch((err) => {
+        this.setState({ loading: false });
+      });
   }
   render() {
-    const { item } = this.props.route.params;
-    return (
-      <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.view}>
-          <Text style={styles.textTitle}>{item.TITLE} </Text>
-          <View style={styles.viewChildTime}>
-            <IconComponets name="clock" size={sizeFont(4)} color="#999" />
-            <Text style={styles.textTime}>
-              {moment(item.CREATE_DATE, "H:mm:ss DD/MM/YYYY").format(
-                "H:mm:ss DD/MM/YYYY"
-              )}{" "}
-            </Text>
+    const {loading,data}=this.state;
+    const {item}=this.props.route.params;
+    
+    return loading ? (
+      <Spinner
+        visible={loading}
+        animation="fade"
+        customIndicator={<ElementCustom />}
+      />
+    ) : (
+      <View>
+        {data.map(value=>(
+          <View>
+              {value.ID==item?<View>
+                <ScrollView style={{paddingLeft:10,paddingRight:10 }}>
+                      <HTML
+                        html={value.CONTENT}
+                      />
+                </ScrollView></View>:null}
           </View>
-        </View>
-        <View style={styles.viewDescription}>
-          <Text>{item.DESCRIPTION} </Text>
-        </View>
-      </ScrollView>
-    );
+        ))}
+    </View>
+      );
   }
 }
+const mapStateToProps = (state) => {
+  return {
+    status: state.authUser.status,
+    authUser: state.authUser.authUser,
+    username: state.authUser.username,
+    idshop: state.product.database,
+  };
+};
 
+const mapDispatchToProps = (dispatch) => {
+  return {};
+};
 const styles = StyleSheet.create({
-  container: {
-    width: sizeWidth(96),
-    alignSelf: "center",
-    marginTop: sizeHeight(1),
-  },
-  view: {
+  viewContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    flexWrap:"wrap"
-  },
-  viewChildTime: {
-    flexDirection: "row",
-    alignContent: "center",
     alignItems: "center",
-  },
-  textTime: {
-    color: "#888",
-    paddingLeft: sizeWidth(2),
+    alignContent: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
+    paddingVertical: sizeHeight(2),
+    paddingHorizontal: sizeWidth(2.5),
   },
   textTitle: {
     fontSize: sizeFont(4),
-    fontWeight: "bold",
-  },
-  viewDescription: {
-    marginTop: sizeHeight(2),
+    color: "#000",
   },
 });
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Tranning);
